@@ -1,27 +1,29 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { registerUser } from "../services/authApi";
 import { useAuth } from "../context/AuthContext";
 
 function Register() {
     const [email, setEmail] = useState("");
-    const [password , setPassword] = useState();
+    const [password , setPassword] = useState("");
     const navigate = useNavigate();
     const { register } = useAuth();
     
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (!email || !password) {
             alert("All fields required");
             return;
         }
 
-        const success = register(email, password);
-        if (!success) {
-            alert("User already exists")
-            return;
-        }
+        try {
+            await registerUser({ email, password });
 
-        alert("Registration successful. Please login.");
-        navigate("/login");
+            alert("Registration successful. Please login.");
+            navigate("/login");    
+        } catch (err) {
+            const errorMsg = err.response?.data?.message || "Registration failed";
+            alert(errorMsg);
+        }
     };
 
     return (
@@ -31,7 +33,7 @@ function Register() {
                 <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
                 <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
                 <button onClick={handleRegister} style={btnStyle}>Register</button>
-                <p>
+                <p style={{ marginTop: "10px"}}>
                     Already have an account? <Link to="/login">Login</Link>
                 </p>
             </div>

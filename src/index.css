@@ -21,6 +21,14 @@ body {
     border-radius: 10px;
     margin-bottom: 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+/* Hover effect */
+.card:hover {
+  border-color: #b3d7ff;
+  background-color: #f8fbff;
 }
 
 select {

@@ -1,22 +1,35 @@
 import { useState } from "react";
-import { useNavigate, Link} from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { loginUser } from "../services/authApi";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = () => {
-    const success = login(email, password);
-
-    if (!success) {
-      alert("Invalid credentials");
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please enter email and password");
       return;
     }
 
-    navigate("/");
+    try {
+      const res = await loginUser({ email, password });
+
+      const token = res.data?.token || res.token;
+      const userData = res.data?.user || res.user;
+      if (token) {
+        localStorage.setItem("token", token);
+        login(userData, token);
+        navigate("/");
+      }
+    } catch (err) {
+      console.log("BACKEND ERROR:", err.response?.data);
+      alert(err.response?.data?.message || "Something went wrong");
+    }
   };
 
   return (

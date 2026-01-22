@@ -16,7 +16,7 @@ export const rams = [
 
 export const storages = [
   {id: 1, name: "1TB HDD", type: "HDD", price: 3500,},
-  {id: 1, name: "512 SSD", type: "SSD", price: 4500,},
+  {id: 2, name: "512 SSD", type: "SSD", price: 4500,},
 ];
 
 export const gpus = [
