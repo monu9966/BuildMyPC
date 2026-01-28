@@ -28,3 +28,15 @@ export const psus = [
   {id: 1, name: "550W PSU", watt: 550, price: 3500,},
   {id: 2, name: "750 PSU", watt: 750, price: 5000,},
 ];
+
+export const cabinets = [
+  { id: 1, name: "Ant Esports ICE-200TG", price: 2500 },
+  { id: 2, name: "Corsair 4000D Airflow", price: 6500 },
+  { id: 3, name: "Cooler Master MB520", price: 5000 }
+];
+
+export const monitors = [
+  { id: 1, name: "LG 22'' 75Hz", price: 7500 },
+  { id: 2, name: "Acer 24'' 144Hz Gaming", price: 13500 },
+  { id: 3, name: "Samsung 27'' IPS", price: 16500 }
+];

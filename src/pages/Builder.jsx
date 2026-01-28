@@ -7,6 +7,8 @@ import {
   storages,
   gpus,
   psus,
+  cabinets,
+  monitors,
 } from "../data/components";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +20,8 @@ function Builder() {
   const [storage, setStorage] = useState(null);
   const [gpu, setGpu] = useState(null);
   const [psu, setPsu] = useState(null);
+  const [cabinet, setCabinet] = useState(null);
+  const [monitor, setMonitor] = useState(null);
 
   const location = useLocation();
   const usage = location.state?.usage;
@@ -31,9 +35,11 @@ function Builder() {
       (ram?.price || 0) +
       (storage?.price || 0) +
       (gpu?.price || 0) +
-      (psu?.price || 0)
+      (psu?.price || 0) +
+      (cabinet?.price || 0) +
+      (monitor?.price || 0)
     );
-  }, [cpu, motherboard, ram, storage, gpu, psu]);
+  }, [cpu, motherboard, ram, storage, gpu, psu, cabinet, monitor]);
 
   // Compatibility rules
   const cpuMbCompat =
@@ -43,23 +49,51 @@ function Builder() {
   const gpuPsuCompat = gpu && psu ? psu.watt >= gpu.watt : null;
 
   return (
-    <div className="container">
-      <h2>PC Builder</h2>
+    <div className="builder-page">
+      <div className="builder-container">
+        <h2 className="builder-title">PC Builder</h2>
 
-      <SelectBox title="CPU" options={cpus} onSelect={setCpu} />
-      <SelectBox
-        title="Motherboard"
-        options={motherboards}
-        onSelect={setMotherboard}
-      />
-      <SelectBox title="RAM" options={rams} onSelect={setRam} />
-      <SelectBox title="Storage" options={storages} onSelect={setStorage} />
-      <SelectBox title="GPU" options={gpus} onSelect={setGpu} />
-      <SelectBox title="Power Supply" options={psus} onSelect={setPsu} />
+        {/* Select sections */}
+        <div className="builder-card">
+          <SelectBox title="CPU" options={cpus} onSelect={setCpu} />
+        </div>
 
-      <div className="card">
-        <div className="card">
+        <div className="builder-card">
+          <SelectBox
+            title="Motherboard"
+            options={motherboards}
+            onSelect={setMotherboard}
+          />
+        </div>
+
+        <div className="builder-card">
+          <SelectBox title="RAM" options={rams} onSelect={setRam} />
+        </div>
+
+        <div className="builder-card">
+          <SelectBox title="Storage" options={storages} onSelect={setStorage} />
+        </div>
+
+        <div className="builder-card">
+          <SelectBox title="GPU" options={gpus} onSelect={setGpu} />
+        </div>
+
+        <div className="builder-card">
+          <SelectBox title="Power Supply" options={psus} onSelect={setPsu} />
+        </div>
+
+        <div className="builder-card">
+          <SelectBox title="Cabinet" options={cabinets} onSelect={setCabinet} />
+        </div>
+
+        <div className="builder-card">
+          <SelectBox title="Monitor" options={monitors} onSelect={setMonitor} />
+        </div>
+
+        {/* Compatibility */}
+        <div className="compatibility-box">
           <h3>Compatibility Status</h3>
+
           <p>
             CPU & Motherboard:{" "}
             {cpuMbCompat === null
@@ -68,6 +102,7 @@ function Builder() {
                 ? "✅ Compatible"
                 : "❌ Not Compatible"}
           </p>
+
           <p>
             RAM & Motherboard:{" "}
             {ramCompat === null
@@ -76,6 +111,7 @@ function Builder() {
                 ? "✅ Compatible"
                 : "❌ Not Compatible"}
           </p>
+
           <p>
             GPU & PSU:{" "}
             {gpuPsuCompat === null
@@ -86,47 +122,96 @@ function Builder() {
           </p>
         </div>
 
-        <h3>Selected Components.</h3>
-        <ul>
-          <li>CPU: {cpu?.name || "Not selected"}</li>
-          <li>Motherboard: {motherboard?.name || "Not selected"} </li>
-          <li>RAM: {ram?.name || "Not selected"} </li>
-          <li>Storage: {storage?.name || "Not selected"}</li>
-          <li>GPU: {gpu?.name || "Not selected"} </li>
-          <li>PSU: {psu?.name || "Not selected"} </li>
-        </ul>
-      </div>
+        {/* Selected components */}
+        <div className="selected-list">
+          <h3>Selected Components</h3>
 
-      <div>
-        <h2>Total Price</h2>
-        <h1 style={{ color: "#0d6efd" }}>₹{totalPrice}</h1>
-      </div>
+          <ul>
+            <li>
+              <div className="price-row">
+                <span> <b>CPU:</b> {cpu?.name || "Not selected"} </span>
+                <span>₹{cpu?.price || 0}</span>
+              </div>
+            </li>
+            <li>
+              <div className="price-row">
+                <span> <b>Motherboard:</b> {motherboard?.name || "Not selected"} </span>
+                <span>₹{motherboard?.price || 0}</span>
+              </div>
+            </li>
+            <li>
+              <div className="price-row">
+                <span> <b>RAM:</b> {ram?.name || "Not selected"} </span>
+                <span>₹{ram?.price || 0}</span>
+              </div>
+            </li>
+            <li>
+              <div className="price-row">
+                <span><b>Storage:</b> {storage?.name || "Not selected"} </span>
+                <span>₹{storage?.price || 0}</span>
+              </div>
+            </li>
+            <li>
+              <div className="price-row">
+                <span> <b>GPU:</b> {gpu?.name || "Not selected"} </span>
+                <span>₹{gpu?.price || 0}</span>
+              </div>
+            </li>
+            <li>
+              <div className="price-row">
+                <span> <b>PSU:</b> {psu?.name || "Not selected"} </span>
+                <span>₹{psu?.price || 0}</span>
+              </div>
+            </li>
+            <li>
+              <div className="price-row">
+                <span> <b>Cabinet:</b> {cabinet?.name || "Not selected"} </span>
+                <span>₹{cabinet?.price || 0}</span>
+              </div>
+            </li>
+            <li>
+              <div className="price-row">
+                <span> <b>Monitor:</b> {monitor?.name || "Not selected"} </span>
+                <span>₹{monitor?.price || 0}</span>
+              </div>
+            </li>
+          </ul>
 
-      <button
-        onClick={() =>
-          navigate("/summary", {
-            state: {
-              cpu,
-              motherboard,
-              ram,
-              storage,
-              gpu,
-              psu,
-              totalPrice,
-            },
-          })
-        }
-        style={{
-          padding: "12px 25px",
-          backgroundColor: "#198754",
-          color: "#fff",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-        }}
-      >
-        View Summary
-      </button>
+          <hr />
+
+          <div className="price-row total-row">
+            <span>Total Price:</span>
+            <span>₹{totalPrice}</span>
+          </div>
+        </div>
+
+        {/* Price */}
+        <div className="price-box">
+          <h2>Total Price</h2>
+          <div className="price-value">₹{totalPrice}</div>
+
+          <button
+            className="summary-btn"
+            onClick={() =>
+              navigate("/summary", {
+                state: {
+                  cpu,
+                  motherboard,
+                  ram,
+                  storage,
+                  gpu,
+                  psu,
+                  cabinet,
+                  monitor,
+                  totalPrice,
+                },
+              })
+            }
+          >
+            View Summary
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
