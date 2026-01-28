@@ -16,16 +16,17 @@ function Home() {
   };
 
   return (
-    <div className="container">
-      <div>
-        <h1>Welcome to BuildMyPC</h1>
-        <p>
+    <div className="hero">
+      <div className="hero-content">
+        <h1 className="hero-title">Welcome to BuildMyPC 💻</h1>
+        <p className="hero-subtitle">
           Customize your custom pc easily by selecting compatible components
           based on your budget and needs.
-        </p>
+        </p></div>
+        <div className="section">
         <h3>Selceted Usage: {usage || "Not selected"}</h3>
 
-        <div style={{ display: "fleq", gap: "20px" }}>
+        <div className="usage-container">
           <UsageCard
             title="🎮 Gaming"
             description="High performance PC for gaming"
@@ -50,8 +51,7 @@ function Home() {
         <button onClick={handleBuild} style={btnStyle}>
           Start Building
         </button>
-      </div>
-      <Link></Link>
+        <Link></Link></div>
     </div>
   );
 }

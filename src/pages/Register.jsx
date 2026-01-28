@@ -1,59 +1,72 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../services/authApi";
-import { useAuth } from "../context/AuthContext";
 
 function Register() {
-    const [email, setEmail] = useState("");
-    const [password , setPassword] = useState("");
-    const navigate = useNavigate();
-    const { register } = useAuth();
-    
-    const handleRegister = async () => {
-        if (!email || !password) {
-            alert("All fields required");
-            return;
-        }
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-        try {
-            await registerUser({ email, password });
+  const navigate = useNavigate();
 
-            alert("Registration successful. Please login.");
-            navigate("/login");    
-        } catch (err) {
-            const errorMsg = err.response?.data?.message || "Registration failed";
-            alert(errorMsg);
-        }
-    };
+  const handleRegister = async (e) => {
+    e.preventDefault(); // ⭐ VERY IMPORTANT
 
-    return (
-        <div className="container">
-            <div className="card">
-                <h2>Create Account</h2>
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
-                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
-                <button onClick={handleRegister} style={btnStyle}>Register</button>
-                <p style={{ marginTop: "10px"}}>
-                    Already have an account? <Link to="/login">Login</Link>
-                </p>
-            </div>
-        </div>
-    );
+    if (!name || !email || !password) {
+      alert("All fields required");
+      return;
+    }
+
+    try {
+      await registerUser({ name, email, password });
+
+      alert("Registration successful. Please login.");
+      navigate("/login");
+    } catch (err) {
+      alert(err.response?.data?.message || "Registration failed");
+    }
+  };
+
+  return (
+    <div className="auth-page">
+      <form className="auth-card" onSubmit={handleRegister}>
+        <h2>Create Account</h2>
+
+        <input
+          className="auth-input"
+          type="text"
+          placeholder="Enter name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <input
+          className="auth-input"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          className="auth-input"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {/* ⭐ IMPORTANT */}
+        <button className="auth-btn" type="submit">
+          Register
+        </button>
+
+        <p className="auth-link">
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+      </form>
+    </div>
+  );
 }
-
-const inputStyle = {
-    width: "100%",
-    padding: "10px",
-    marginBottom: "12px",
-};
-
-const btnStyle = {
-    width: "100%",
-    padding: "10px",
-    backgroundColor: "#198754",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-};
 
 export default Register;

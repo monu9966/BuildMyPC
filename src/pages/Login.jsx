@@ -6,11 +6,14 @@ import { loginUser } from "../services/authApi";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
     if (!email || !password) {
       alert("Please enter email and password");
       return;
@@ -21,6 +24,7 @@ function Login() {
 
       const token = res.data?.token || res.token;
       const userData = res.data?.user || res.user;
+
       if (token) {
         localStorage.setItem("token", token);
         login(userData, token);
@@ -33,48 +37,43 @@ function Login() {
   };
 
   return (
-    <div className="container">
-      <div className="card">
+    <div className="auth-page">
+      <form className="auth-card" onSubmit={handleLogin}>
         <h2>User Login</h2>
+
         <input
+          className="auth-input"
           type="email"
           placeholder="Enter email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={inputStyle}
         />
+
         <input
-          type="password"
+          className="auth-input"
+          type={showPassword ? "text" : "password"}
           placeholder="Enter password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={inputStyle}
         />
-        <button onClick={handleLogin} style={btnStyle}>
+        
+        <span
+          className="eye-btn"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? "🙈" : "👁"}
+        </span>
+
+        <button className="auth-btn" type="submit">
           Login
         </button>
 
-        <p style={{ marginTop: "10px" }}>
+        <p className="auth-link">
           New user? <Link to="/register">Create account</Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 }
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginBottom: "15px",
-};
-
-const btnStyle = {
-  padding: "10px",
-  width: "100%",
-  backgroundColor: "#0d6efd",
-  color: "#fff",
-  border: "none",
-  borderRadius: "6px",
-};
 
 export default Login;

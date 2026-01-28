@@ -6,6 +6,7 @@ import Summary from "./pages/Summary";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Footer from "./components/footer";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/builder" element={<Builder />} />
         <Route path="/summary" element={<ProtectedRoute><Summary /></ProtectedRoute>} />
       </Routes>
+      <Footer />
     </>
   );
 }
