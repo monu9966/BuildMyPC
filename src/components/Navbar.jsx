@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
 
   // Helper function to close menu when a link is clicked
   const closeMenu = () => setMenuOpen(false);
@@ -45,6 +47,16 @@ function Navbar() {
             >
               View Summary
             </Link>
+            <Link to="/my-builds" onClick={() => setMenuOpen(false)}>
+              MyBuild
+            </Link>
+
+            {/* ⭐ ADMIN BUTTON */}
+            {user.role === "admin" && (
+              <Link to="/admin" onClick={closeMenu} style={styles.link}>
+                Admin
+              </Link>
+            )}
           </>
         )}
 
@@ -57,10 +69,18 @@ function Navbar() {
           </>
         ) : (
           <>
-            <Link to="/register" onClick={() => setMenuOpen(false)} style={styles.signupBtn}>
+            <Link
+              to="/register"
+              onClick={() => setMenuOpen(false)}
+              style={styles.signupBtn}
+            >
               Sign Up
             </Link>
-            <Link to="/login" onClick={() => setMenuOpen(false)} style={styles.link}>
+            <Link
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              style={styles.link}
+            >
               Login
             </Link>
           </>
@@ -89,7 +109,7 @@ const styles = {
     marginLeft: "20px",
     textDecoration: "none",
     fontWeight: "bold",
-  }
+  },
 };
 
 export default Navbar;

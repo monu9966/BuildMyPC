@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { saveBuild } from "../services/buildApi";
 
 function Summary() {
   const location = useLocation();
@@ -29,8 +30,24 @@ function Summary() {
         ["TOTAL PRICE", "", totalPrice],
       ],
     });
-
     doc.save("BuildMyPC-Summary.pdf");
+  };
+
+  const handleSave = async () => {
+    await saveBuild({
+      components: {
+        cpu,
+        motherboard,
+        ram,
+        storage,
+        gpu,
+        psu,
+        cabinet,
+        monitor,
+      },
+      totalPrice,
+    });
+    alert("Build saved successfully!");
   };
 
   if (!build) {
@@ -144,6 +161,10 @@ function Summary() {
         <br />
         <button onClick={() => navigate("/builder")} style={btnStyle}>
           Edit Build
+        </button>
+
+        <button onClick={handleSave} className="summary-btn">
+          Save Build
         </button>
 
         <button onClick={downloadPDF} className="summary-btn">
