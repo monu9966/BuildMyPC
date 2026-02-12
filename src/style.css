@@ -759,4 +759,20 @@ flex-direction: column;
   font-weight: bold;
 }
 
+/* add Components */
+.comp-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
 
+.comp-form input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.comp-form select {
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}

@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/footer";
 import Admin from "./pages/Admin";
 
+
 function App() {
   return (
     <>

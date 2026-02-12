@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
+
 import {
   getUsers,
   deleteUser,
   getBuilds,
   deleteBuild,
 } from "../services/adminApi";
+
+import {
+  getComponents,
+  addComponent,
+  updateComponent,
+  deleteComponent,
+} from "../services/componentApi";
 
 function Admin() {
   const [users, setUsers] = useState([]);
@@ -16,10 +24,16 @@ function Admin() {
     revenue: 0,
   });
 
+  const [components, setComponents] = useState([]);
+  const [form, setForm] = useState({ type: "", name: "", price: "" });
+  const [editingId, setEditingId] = useState(null);
+
   const loadData = async () => {
     const u = await getUsers();
     const b = await getBuilds();
+    const c = await getComponents();
 
+    setComponents(c.data);
     setUsers(u.data);
     setBuilds(b.data);
 
@@ -49,6 +63,99 @@ function Admin() {
   return (
     <div className="admin-container">
       <h2>Admin Dashboard</h2>
+
+      <h3>Components</h3>
+
+      {/* ADD / EDIT FORM */}
+      <div className="comp-form">
+        <select
+          value={form.type}
+          onChange={(e) => setForm({ ...form, type: e.target.value })}
+        >
+          <option value="">Select Type</option>
+          <option value="CPU">CPU</option>
+          <option value="GPU">GPU</option>
+          <option value="RAM">RAM</option>
+          <option value="Motherboard">Motherboard</option>
+          <option value="Storage">Storage</option>
+          <option value="PSU">PSU</option>
+          <option value="Cabinet">Cabinet</option>
+          <option value="Monitor">Monitor</option>
+        </select>
+
+        <input
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+
+        <input
+          placeholder="Price"
+          type="number"
+          value={form.price}
+          onChange={(e) => setForm({ ...form, price: e.target.value })}
+        />
+
+        <button
+          onClick={async () => {
+            if (editingId) {
+              await updateComponent(editingId, form);
+              setEditingId(null);
+            } else {
+              await addComponent(form);
+            }
+            setForm({ type: "", name: "", price: "" });
+            loadData();
+          }}
+        >
+          {editingId ? "Update" : "Add"}
+        </button>
+      </div>
+
+      {/* TABLE */}
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {components.map((c) => (
+            <tr key={c._id}>
+              <td>{c.type}</td>
+              <td>{c.name}</td>
+              <td>₹{c.price}</td>
+              <td>
+                <button
+                  onClick={() => {
+                    setForm(c);
+                    setEditingId(c._id);
+                  }}
+                >
+                  Edit
+                </button>
+
+                <button
+                  className="delete-btn"
+                  onClick={async () => {
+                    const confirmDelete = window.confirm("Are you sure?");
+                    if (!confirmDelete) return;
+
+                    await deleteComponent(c._id);
+                    loadData();
+                  }}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       {/* ===== STATS CARDS ===== */}
       <div className="stats-grid">
