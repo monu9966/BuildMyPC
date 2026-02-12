@@ -4,7 +4,14 @@ import Component from "../models/Component.js";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const data = await Component.find();
+  const { type } = req.query;
+
+  let filter = {};
+  if (type) {
+    filter.type = type;
+  }
+
+  const data = await Component.find(filter);
   res.json(data);
 });
 

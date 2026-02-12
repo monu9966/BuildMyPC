@@ -25,7 +25,15 @@ function Admin() {
   });
 
   const [components, setComponents] = useState([]);
-  const [form, setForm] = useState({ type: "", name: "", price: "" });
+  const [form, setForm] = useState({
+    type: "",
+    name: "",
+    price: "",
+    price: "",
+    socket: "",
+    ramType: "",
+    watt: "",
+  });
   const [editingId, setEditingId] = useState(null);
 
   const loadData = async () => {
@@ -70,7 +78,16 @@ function Admin() {
       <div className="comp-form">
         <select
           value={form.type}
-          onChange={(e) => setForm({ ...form, type: e.target.value })}
+          onChange={(e) =>
+            setForm({
+              type: e.target.value,
+              name: "",
+              price: "",
+              socket: "",
+              ramType: "",
+              watt: "",
+            })
+          }
         >
           <option value="">Select Type</option>
           <option value="CPU">CPU</option>
@@ -89,6 +106,31 @@ function Admin() {
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
 
+        {(form.type === "Motherboard" || form.type === "CPU") && (
+          <input
+            placeholder="Socket (optional)"
+            value={form.socket || ""}
+            onChange={(e) => setForm({ ...form, socket: e.target.value })}
+          />
+        )}
+
+        {form.type === "RAM" && (
+          <input
+            placeholder="RAM Type (e.g. DDR4)"
+            value={form.ramType || ""}
+            onChange={(e) => setForm({ ...form, ramType: e.target.value })}
+          />
+        )}
+
+        {(form.type === "GPU" || form.type === "PSU") && (
+          <input
+            type="number"
+            placeholder="Watt (optional)"
+            value={form.watt || ""}
+            onChange={(e) => setForm({ ...form, watt: e.target.value })}
+          />
+        )}
+
         <input
           placeholder="Price"
           type="number"
@@ -104,7 +146,14 @@ function Admin() {
             } else {
               await addComponent(form);
             }
-            setForm({ type: "", name: "", price: "" });
+            setForm({
+              type: "",
+              name: "",
+              price: "",
+              socket: "",
+              ramType: "",
+              watt: "",
+            });
             loadData();
           }}
         >

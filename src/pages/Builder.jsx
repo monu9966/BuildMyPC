@@ -1,17 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import SelectBox from "../components/SelectBox";
-import {
-  cpus,
-  motherboards,
-  rams,
-  storages,
-  gpus,
-  psus,
-  cabinets,
-  monitors,
-} from "../data/components";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { getComponents } from "../services/componentApi";
 
 function Builder() {
   const [cpu, setCpu] = useState(null);
@@ -23,9 +14,33 @@ function Builder() {
   const [cabinet, setCabinet] = useState(null);
   const [monitor, setMonitor] = useState(null);
 
+  const [cpus, setCpus] = useState([]);
+  const [motherboards, setMotherboards] = useState([]);
+  const [rams, setRams] = useState([]);
+  const [gpus, setGpus] = useState([]);
+  const [storages, setStorages] = useState([]);
+  const [psus, setPsus] = useState([]);
+  const [cabinets, setCabinets] = useState([]);
+  const [monitors, setMonitors] = useState([]);
+
   const location = useLocation();
   const usage = location.state?.usage;
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setCpus((await getComponents("CPU")).data);
+      setMotherboards((await getComponents("Motherboard")).data);
+      setRams((await getComponents("RAM")).data);
+      setGpus((await getComponents("GPU")).data);
+      setStorages((await getComponents("Storage")).data);
+      setPsus((await getComponents("PSU")).data);
+      setCabinets((await getComponents("Cabinet")).data);
+      setMonitors((await getComponents("Monitor")).data);
+    };
+
+    fetchData();
+  }, []);
 
   // Total Price Calculation
   const totalPrice = useMemo(() => {
@@ -129,49 +144,72 @@ function Builder() {
           <ul>
             <li>
               <div className="price-row">
-                <span> <b>CPU:</b> {cpu?.name || "Not selected"} </span>
+                <span>
+                  {" "}
+                  <b>CPU:</b> {cpu?.name || "Not selected"}{" "}
+                </span>
                 <span>₹{cpu?.price || 0}</span>
               </div>
             </li>
             <li>
               <div className="price-row">
-                <span> <b>Motherboard:</b> {motherboard?.name || "Not selected"} </span>
+                <span>
+                  {" "}
+                  <b>Motherboard:</b> {motherboard?.name || "Not selected"}{" "}
+                </span>
                 <span>₹{motherboard?.price || 0}</span>
               </div>
             </li>
             <li>
               <div className="price-row">
-                <span> <b>RAM:</b> {ram?.name || "Not selected"} </span>
+                <span>
+                  {" "}
+                  <b>RAM:</b> {ram?.name || "Not selected"}{" "}
+                </span>
                 <span>₹{ram?.price || 0}</span>
               </div>
             </li>
             <li>
               <div className="price-row">
-                <span><b>Storage:</b> {storage?.name || "Not selected"} </span>
+                <span>
+                  <b>Storage:</b> {storage?.name || "Not selected"}{" "}
+                </span>
                 <span>₹{storage?.price || 0}</span>
               </div>
             </li>
             <li>
               <div className="price-row">
-                <span> <b>GPU:</b> {gpu?.name || "Not selected"} </span>
+                <span>
+                  {" "}
+                  <b>GPU:</b> {gpu?.name || "Not selected"}{" "}
+                </span>
                 <span>₹{gpu?.price || 0}</span>
               </div>
             </li>
             <li>
               <div className="price-row">
-                <span> <b>PSU:</b> {psu?.name || "Not selected"} </span>
+                <span>
+                  {" "}
+                  <b>PSU:</b> {psu?.name || "Not selected"}{" "}
+                </span>
                 <span>₹{psu?.price || 0}</span>
               </div>
             </li>
             <li>
               <div className="price-row">
-                <span> <b>Cabinet:</b> {cabinet?.name || "Not selected"} </span>
+                <span>
+                  {" "}
+                  <b>Cabinet:</b> {cabinet?.name || "Not selected"}{" "}
+                </span>
                 <span>₹{cabinet?.price || 0}</span>
               </div>
             </li>
             <li>
               <div className="price-row">
-                <span> <b>Monitor:</b> {monitor?.name || "Not selected"} </span>
+                <span>
+                  {" "}
+                  <b>Monitor:</b> {monitor?.name || "Not selected"}{" "}
+                </span>
                 <span>₹{monitor?.price || 0}</span>
               </div>
             </li>

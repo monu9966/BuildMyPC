@@ -12,7 +12,7 @@ function SelectBox({ title, options, onSelect }) {
         <option value="">Select {title}</option>
 
         {options.map((item) => (
-          <option key={item.id} value={JSON.stringify(item)}>
+          <option key={item._id} value={JSON.stringify(item)}>
             {item.name} (₹{item.price})
           </option>
         ))}

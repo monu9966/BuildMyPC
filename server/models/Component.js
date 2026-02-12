@@ -1,20 +1,40 @@
 import mongoose from "mongoose";
 
-const componentSchema = new mongoose.Schema({
+const componentSchema = new mongoose.Schema(
+  {
     type: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     name: {
-        type: String,
-        required: true,
-    },
-    price: {
-        type: Number,
-        required: true,
+      type: String,
+      required: true,
     },
 
-    specs: Object, 
-}, { timestamps: true });
+    // Optional fields
+    socket: {
+      type: String,
+      default: "",
+    },
+
+    ramType: {
+      type: String,
+      default: "",
+    },
+
+    watt: {
+      type: Number,
+      default: "",
+    },
+
+    price: {
+      type: Number,
+      required: true,
+    },
+
+    specs: Object,
+  },
+  { timestamps: true },
+);
 
 export default mongoose.model("Component", componentSchema);
