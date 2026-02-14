@@ -32,6 +32,11 @@ const componentSchema = new mongoose.Schema(
       required: true,
     },
 
+    image: {
+    type: String,
+    default: "",
+    },
+
     specs: Object,
   },
   { timestamps: true },

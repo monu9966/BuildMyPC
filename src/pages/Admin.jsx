@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useRef } from "react";
+
 
 import {
   getUsers,
@@ -33,7 +35,10 @@ function Admin() {
     socket: "",
     ramType: "",
     watt: "",
+    image: "",
   });
+
+  const fileRef = useRef();
   const [editingId, setEditingId] = useState(null);
 
   const loadData = async () => {
@@ -138,23 +143,54 @@ function Admin() {
           onChange={(e) => setForm({ ...form, price: e.target.value })}
         />
 
+        <input
+          type="file"
+          ref={fileRef}
+          onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+        />
+
         <button
           onClick={async () => {
-            if (editingId) {
-              await updateComponent(editingId, form);
-              setEditingId(null);
-            } else {
-              await addComponent(form);
+            try {
+              // 🔹 UPDATE
+              if (editingId) {
+                const data = new FormData();
+                Object.keys(form).forEach((key) => {
+                  data.append(key, form[key]);
+                });
+
+                await updateComponent(editingId, data);
+                alert("Component updated!");
+                setEditingId(null);
+              }
+
+              // 🔹 ADD
+              else {
+                const data = new FormData();
+                Object.keys(form).forEach((key) => {
+                  data.append(key, form[key]);
+                });
+
+                await addComponent(data);
+                alert("Component added!");
+              }
+
+              // 🔹 Reset Form
+              setForm({
+                type: "",
+                name: "",
+                price: "",
+                socket: "",
+                ramType: "",
+                watt: "",
+                image: "",
+              });
+              fileRef.current.value = "";
+              loadData();
+            } catch (err) {
+              console.log(err);
+              alert("Select all  adding component");
             }
-            setForm({
-              type: "",
-              name: "",
-              price: "",
-              socket: "",
-              ramType: "",
-              watt: "",
-            });
-            loadData();
           }}
         >
           {editingId ? "Update" : "Add"}

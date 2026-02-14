@@ -150,6 +150,14 @@ function Builder() {
                 </span>
                 <span>₹{cpu?.price || 0}</span>
               </div>
+
+              {cpu?.image && (
+                <img
+                  src={cpu.image}
+                  alt="cpu"
+                  style={{ width: "120px", marginTop: "10px" }}
+                />
+              )}
             </li>
             <li>
               <div className="price-row">
@@ -159,6 +167,13 @@ function Builder() {
                 </span>
                 <span>₹{motherboard?.price || 0}</span>
               </div>
+              {motherboard?.image && (
+                <img
+                  src={motherboard.image}
+                  alt="motherboard"
+                  style={{ width: "120px", marginTop: "10px" }}
+                />
+              )}
             </li>
             <li>
               <div className="price-row">
@@ -168,6 +183,13 @@ function Builder() {
                 </span>
                 <span>₹{ram?.price || 0}</span>
               </div>
+              {ram?.image && (
+                <img
+                  src={ram.image}
+                  alt="ram"
+                  style={{ width: "120px", marginTop: "10px" }}
+                />
+              )}
             </li>
             <li>
               <div className="price-row">
@@ -176,6 +198,13 @@ function Builder() {
                 </span>
                 <span>₹{storage?.price || 0}</span>
               </div>
+              {storage?.image && (
+                <img
+                  src={storage.image}
+                  alt="storage"
+                  style={{ width: "120px", marginTop: "10px" }}
+                />
+              )}
             </li>
             <li>
               <div className="price-row">
@@ -185,6 +214,13 @@ function Builder() {
                 </span>
                 <span>₹{gpu?.price || 0}</span>
               </div>
+              {gpu?.image && (
+                <img
+                  src={gpu.image}
+                  alt="gpu"
+                  style={{ width: "120px", marginTop: "10px" }}
+                />
+              )}
             </li>
             <li>
               <div className="price-row">
@@ -194,6 +230,13 @@ function Builder() {
                 </span>
                 <span>₹{psu?.price || 0}</span>
               </div>
+              {psu?.image && (
+                <img
+                  src={psu.image}
+                  alt="psu"
+                  style={{ width: "120px", marginTop: "10px" }}
+                />
+              )}
             </li>
             <li>
               <div className="price-row">
@@ -203,6 +246,13 @@ function Builder() {
                 </span>
                 <span>₹{cabinet?.price || 0}</span>
               </div>
+              {cabinet?.image && (
+                <img
+                  src={cabinet.image}
+                  alt="cabinet"
+                  style={{ width: "120px", marginTop: "10px" }}
+                />
+              )}
             </li>
             <li>
               <div className="price-row">
@@ -212,6 +262,13 @@ function Builder() {
                 </span>
                 <span>₹{monitor?.price || 0}</span>
               </div>
+              {monitor?.image && (
+                <img
+                  src={monitor.image}
+                  alt="monitor"
+                  style={{ width: "120px", marginTop: "10px" }}
+                />
+              )}
             </li>
           </ul>
 
