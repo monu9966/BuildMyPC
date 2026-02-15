@@ -1,14 +1,18 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import buildRoutes from "./routes/buildRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import componentRoutes from "./routes/componentRoutes.js";
 
-dotenv.config();
-console.log("JWT Secret Check:", process.env.JWT_SECRET); // Should print your secret, not 'undefined'
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, ".env") });
+console.log("JWT Secret Check:", process.env.JWT_SECRET);
 connectDB();
 
 const app = express();

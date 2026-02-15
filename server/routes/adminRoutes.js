@@ -28,4 +28,13 @@ router.delete("/builds/:id", async (req, res) => {
   res.json({ message: "Build deleted" });
 });
 
+router.get("/stats", async (req,res)=>{
+  const users = await User.countDocuments();
+  const builds = await Build.countDocuments();
+  const components = await Component.countDocuments();
+
+  res.json({ users, builds, components });
+});
+
+
 export default router;

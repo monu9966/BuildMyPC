@@ -719,6 +719,52 @@ flex-direction: column;
   background: #bb2d3b;
 }
 
+/* BUTTON STYLES - base and variants */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: 0 6px 18px rgba(13,110,253,0.18);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  color: white;
+  box-shadow: 0 6px 18px rgba(13,110,253,0.18);
+}
+
+.btn-primary:hover { transform: translateY(-2px); }
+
+.btn-edit {
+  background: linear-gradient(135deg, #ffd54f, #ffb300);
+  color: #111;
+}
+
+.btn-edit:hover { filter: brightness(0.95); }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #0d6efd;
+  color: #0d6efd;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+/* small spacing for table action buttons */
+.admin-table td button { margin-right: 8px; }
+
 /* ========================
    STATS CARDS
 ======================== */
@@ -862,3 +908,104 @@ flex-direction: column;
   margin-bottom: 10px;
 }
 
+/* admin layout and sidebar  */
+.admin-layout{
+  display:flex;
+  min-height:100vh;
+  background:#f3f6fb;
+  font-family:Segoe UI;
+}
+
+
+/* ===== SIDEBAR ===== */
+
+.admin-sidebar{
+  width:230px;
+  background:linear-gradient(180deg,#0d6efd,#6610f2);
+  color:white;
+  padding:25px 20px;
+  display:flex;
+  flex-direction:column;
+}
+
+
+.admin-sidebar button{
+  background:none;
+  border:none;
+  color:white;
+  padding:12px;
+  margin:5px 0;
+  text-align:left;
+  font-size:15px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.admin-sidebar .logo{
+  margin-bottom:30px;
+}
+
+.admin-sidebar button:hover{
+  background:white;
+  color:#0d6efd;
+}
+
+.admin-content{
+  flex:1;
+  padding:30px;
+  background:#f5f7fb;
+}
+
+/* ===== TABLE ===== */
+
+.admin-table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 10px 20px rgba(0,0,0,.08);
+}
+
+.admin-table th{
+  background: #0d6efd;
+  color:white;
+  padding:12px;
+}
+
+.admin-table tr:hover{
+  background: #f1f5ff;
+}
+
+/* ===== FORM ===== */
+
+.comp-form input,
+.comp-form select{
+  padding:10px;
+  margin:6px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+.comp-form button{
+  padding:10px 20px;
+  background:#0d6efd;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.comp-form button:hover{
+  background:#084298;
+}
+
+
+/* ===== IMAGE ===== */
+
+.preview-img{
+  width:80px;
+  border-radius:8px;
+  margin-top:10px;
+}
