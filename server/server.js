@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import buildRoutes from "./routes/buildRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import componentRoutes from "./routes/componentRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +26,7 @@ app.use("/api/builds", buildRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/components", componentRoutes);
 app.use("/uploads", express.static("uploads"));
+app.use("/api/orders", orderRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

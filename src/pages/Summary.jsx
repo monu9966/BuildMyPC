@@ -2,12 +2,51 @@ import { useLocation, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveBuild } from "../services/buildApi";
+import { useCart } from "../context/CartContext"
+import { FaShoppingCart, FaEdit, FaSave, FaFilePdf } from "react-icons/fa";
 
 function Summary() {
+  const { addToCart } = useCart();
+
   const location = useLocation();
   const navigate = useNavigate();
 
   const build = location.state;
+
+  if (!build) {
+    return (
+      <div className="container">
+        <div className="card">
+          <h2>No Build Found</h2>
+          <button onClick={() => navigate("/builder")}>Go to PC Builder</button>
+        </div>
+      </div>
+    );
+  }
+
+  const {
+    cpu,
+    motherboard,
+    ram,
+    storage,
+    gpu,
+    psu,
+    cabinet,
+    monitor,
+    totalPrice,
+  } = build;
+
+  const buildData = {
+    cpu,
+    motherboard,
+    ram,
+    storage,
+    gpu,
+    psu,
+    cabinet,
+    monitor,
+    totalPrice,
+  };
 
   // pdf download code
   const downloadPDF = () => {
@@ -49,29 +88,6 @@ function Summary() {
     });
     alert("Build saved successfully!");
   };
-
-  if (!build) {
-    return (
-      <div className="container">
-        <div className="card">
-          <h2>No Build Found</h2>
-          <button onClick={() => navigate("/builder")}>Go to PC Builder</button>
-        </div>
-      </div>
-    );
-  }
-
-  const {
-    cpu,
-    motherboard,
-    ram,
-    storage,
-    gpu,
-    psu,
-    cabinet,
-    monitor,
-    totalPrice,
-  } = build;
 
   return (
     <div className="container">
@@ -158,17 +174,28 @@ function Summary() {
           <span>₹{totalPrice}</span>
         </div>
 
+        <button onClick={() => addToCart(buildData)}>
+          <FaShoppingCart style={{ marginRight: "8px" }} /> Add to Cart
+        </button>
+
+        <button
+          className="buy btn"
+          onClick={() => navigate("/checkout", { state: buildData })}
+        >
+          <FaShoppingCart style={{ marginRight: "8px" }} /> Buy Now
+        </button>
+
         <br />
         <button onClick={() => navigate("/builder")} style={btnStyle}>
-          Edit Build
+          <FaEdit style={{ marginRight: "8px" }} /> Edit Build
         </button>
 
         <button onClick={handleSave} className="summary-btn">
-          Save Build
+          <FaSave style={{ marginRight: "8px" }} /> Save Build
         </button>
 
         <button onClick={downloadPDF} className="summary-btn">
-          Download PDF
+          <FaFilePdf style={{ marginRight: "8px" }} /> Download PDF
         </button>
       </div>
     </div>

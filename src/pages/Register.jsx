@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../services/authApi";
+import { FaUserPlus, FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 
 function Register() {
   const [name, setName] = useState("");
@@ -30,35 +31,47 @@ function Register() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleRegister}>
-        <h2>Create Account</h2>
+        <h2><FaUserPlus style={{ marginRight: "8px" }} /> Create Account</h2>
 
-        <input
-          className="auth-input"
-          type="text"
-          placeholder="Enter name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div style={{ position: "relative" }}>
+          <FaUser style={{ position: "absolute", left: "10px", top: "15px", color: "#666" }} />
+          <input
+            className="auth-input"
+            type="text"
+            placeholder="Enter name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={{ paddingLeft: "40px" }}
+          />
+        </div>
 
-        <input
-          className="auth-input"
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div style={{ position: "relative" }}>
+          <FaEnvelope style={{ position: "absolute", left: "10px", top: "15px", color: "#666" }} />
+          <input
+            className="auth-input"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ paddingLeft: "40px" }}
+          />
+        </div>
 
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div style={{ position: "relative" }}>
+          <FaLock style={{ position: "absolute", left: "10px", top: "15px", color: "#666" }} />
+          <input
+            className="auth-input"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ paddingLeft: "40px" }}
+          />
+        </div>
 
         {/* ⭐ IMPORTANT */}
         <button className="auth-btn" type="submit">
-          Register
+          <FaUserPlus style={{ marginRight: "8px" }} /> Register
         </button>
 
         <p className="auth-link">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { loginUser } from "../services/authApi";
+import { FaSignInAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -28,7 +29,11 @@ function Login() {
       if (token) {
         localStorage.setItem("token", token);
         login(userData, token);
-        navigate("/");
+        if (userData.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       }
     } catch (err) {
       console.log("BACKEND ERROR:", err.response?.data);
@@ -56,16 +61,16 @@ function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        
+
         <span
           className="eye-btn"
           onClick={() => setShowPassword(!showPassword)}
         >
-          {showPassword ? "🙈" : "👁"}
+          {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
         </span>
 
         <button className="auth-btn" type="submit">
-          Login
+          <FaSignInAlt style={{ marginRight: "8px" }} /> Login
         </button>
 
         <p className="auth-link">

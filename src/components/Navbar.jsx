@@ -1,12 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { FaHome, FaTools, FaShoppingCart, FaClipboardList, FaSignOutAlt, FaUserPlus, FaSignInAlt, FaBars, FaTimes, FaShieldAlt } from "react-icons/fa";
 
 function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-
 
   // Helper function to close menu when a link is clicked
   const closeMenu = () => setMenuOpen(false);
@@ -22,20 +22,20 @@ function Navbar() {
 
       {/* Hamburger icon */}
       <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
-        ☰
+        {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
       </div>
 
       {/* Nav links */}
       <div className={`nav-links ${menuOpen ? "open" : ""}`}>
         <Link to="/" onClick={() => setMenuOpen(false)} style={styles.link}>
-          Home
+          <FaHome style={{ marginRight: "8px" }} /> Home
         </Link>
         <Link
           to="/builder"
           onClick={() => setMenuOpen(false)}
           style={styles.link}
         >
-          PC Builder
+          <FaTools style={{ marginRight: "8px" }} /> PC Builder
         </Link>
 
         {user && (
@@ -45,16 +45,21 @@ function Navbar() {
               onClick={() => setMenuOpen(false)}
               style={styles.link}
             >
-              View Summary
+              <FaClipboardList style={{ marginRight: "8px" }} /> View Summary
             </Link>
+
+            <Link to="/cart" style={styles.link}>
+              <FaShoppingCart style={{ marginRight: "8px" }} /> Cart
+            </Link>
+
             <Link to="/my-builds" onClick={() => setMenuOpen(false)}>
-              MyBuild
+              <FaTools style={{ marginRight: "8px" }} /> MyBuild
             </Link>
 
             {/* ⭐ ADMIN BUTTON */}
-            {user.role === "admin" && (
+            {user?.role === "admin" && (
               <Link to="/admin" onClick={closeMenu} style={styles.link}>
-                Admin
+                <FaShieldAlt style={{ marginRight: "8px" }} /> Admin
               </Link>
             )}
           </>
@@ -64,7 +69,7 @@ function Navbar() {
           <>
             <span className="nav-user">Hi, {user.name} 👋</span>
             <button onClick={handleLogout} className="logout-btn">
-              Logout
+              <FaSignOutAlt style={{ marginRight: "8px" }} /> Logout
             </button>
           </>
         ) : (
@@ -74,14 +79,14 @@ function Navbar() {
               onClick={() => setMenuOpen(false)}
               style={styles.signupBtn}
             >
-              Sign Up
+              <FaUserPlus style={{ marginRight: "8px" }} /> Sign Up
             </Link>
             <Link
               to="/login"
               onClick={() => setMenuOpen(false)}
               style={styles.link}
             >
-              Login
+              <FaSignInAlt style={{ marginRight: "8px" }} /> Login
             </Link>
           </>
         )}

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import UsageCard from "../components/UsageCard";
 import { useState } from "react";
+import { FaGamepad, FaBriefcase, FaUserGraduate, FaPlay } from "react-icons/fa";
 
 function Home() {
   const [usage, setUsage] = useState(null);
@@ -24,32 +25,32 @@ function Home() {
           based on your budget and needs.
         </p></div>
         <div className="section">
-        <h3>Selceted Usage: {usage || "Not selected"}</h3>
+        <h3>Selected Usage: {usage || "Not selected"}</h3>
 
         <div className="usage-container">
           <UsageCard
-            title="🎮 Gaming"
+            title={<><FaGamepad style={{ marginRight: "8px" }} /> Gaming</>}
             description="High performance PC for gaming"
             selected={usage === "Gaming"}
             onClick={() => setUsage("Gaming")}
           />
 
           <UsageCard
-            title="🏢 Office"
+            title={<><FaBriefcase style={{ marginRight: "8px" }} /> Office</>}
             description="Reliable PC for office & work"
             selected={usage === "Office"}
             onClick={() => setUsage("Office")}
           />
 
           <UsageCard
-            title="🎓 Student"
+            title={<><FaUserGraduate style={{ marginRight: "8px" }} /> Student</>}
             description="Affordable PC for study & learning"
             selected={usage === "Student"}
             onClick={() => setUsage("Student")}
           />
         </div>
         <button onClick={handleBuild} style={btnStyle}>
-          Start Building
+          <FaPlay style={{ marginRight: "8px" }} /> Start Building
         </button>
         <Link></Link></div>
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getMyBuilds } from "../services/buildApi";
+import { FaSave, FaClock } from "react-icons/fa";
 
 function MyBuilds() {
   const [builds, setBuilds] = useState([]);
@@ -10,13 +11,13 @@ function MyBuilds() {
 
   return (
     <div>
-      <h2>My Saved Builds</h2>
-      <h3>Save my pc </h3>
+      <h2><FaSave style={{ marginRight: "8px" }} /> My Saved Builds</h2>
+      <h3>Saved PC Builds </h3>
 
       {builds.map((b) => (
         <div key={b._id} className="builder-card">
-          <p>Total: ₹{b.totalPrice}</p>
-          <p>Date: {new Date(b.createdAt).toLocaleString()}</p>
+          <p><strong>Total:</strong> ₹{b.totalPrice}</p>
+          <p><FaClock style={{ marginRight: "8px" }} /> Date: {new Date(b.createdAt).toLocaleString()}</p>
         </div>
       ))}
     </div>

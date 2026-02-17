@@ -17,3 +17,6 @@ export const getBuilds = () =>
 
 export const deleteBuild = (id) =>
   axios.delete(`${API}/builds/${id}`, token());
+
+// export const getOrders = () =>
+//   axios.get(`${API}/orders/${id}`, token());

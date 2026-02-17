@@ -6,6 +6,8 @@ import {
 } from "../../services/componentApi";
 
 export default function ComponentsAdmin({ components = [], refresh }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const [form, setForm] = useState({
     type: "",
@@ -19,6 +21,13 @@ export default function ComponentsAdmin({ components = [], refresh }) {
 
   const [editingId, setEditingId] = useState(null);
   const fileRef = useRef();
+
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+
+  const currentItems = components.slice(indexOfFirst, indexOfLast);
+
+  const totalPages = Math.ceil(components.length / itemsPerPage);
 
   // ✅ SUBMIT
   const handleSubmit = async () => {
@@ -57,7 +66,6 @@ export default function ComponentsAdmin({ components = [], refresh }) {
       if (fileRef.current) fileRef.current.value = "";
 
       refresh();
-
     } catch (err) {
       console.log(err);
       alert("Error saving component ❌");
@@ -71,6 +79,7 @@ export default function ComponentsAdmin({ components = [], refresh }) {
       {/* ===== FORM ===== */}
 
       <select
+        className="comp-form"
         value={form.type}
         onChange={(e) => setForm({ ...form, type: e.target.value })}
       >
@@ -127,9 +136,7 @@ export default function ComponentsAdmin({ components = [], refresh }) {
       <input
         type="file"
         ref={fileRef}
-        onChange={(e) =>
-          setForm({ ...form, image: e.target.files[0] })
-        }
+        onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
       />
 
       <button className="btn btn-primary" onClick={handleSubmit}>
@@ -139,7 +146,7 @@ export default function ComponentsAdmin({ components = [], refresh }) {
       {/* ===== TABLE ===== */}
       <table className="admin-table">
         <tbody>
-          {components.map((c) => (
+          {currentItems.map((c) => (
             <tr key={c._id}>
               <td>{c.type}</td>
               <td>{c.name}</td>
@@ -159,7 +166,7 @@ export default function ComponentsAdmin({ components = [], refresh }) {
                     });
                     setEditingId(c._id);
                   }}
-                className="btn btn-edit"
+                  className="btn btn-edit"
                 >
                   Edit
                 </button>
@@ -180,6 +187,25 @@ export default function ComponentsAdmin({ components = [], refresh }) {
           ))}
         </tbody>
       </table>
+
+      <div className="pagination">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          ⬅ Prev
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          Next ➡
+        </button>
+      </div>
     </>
   );
 }

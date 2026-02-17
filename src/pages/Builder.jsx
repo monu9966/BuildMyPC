@@ -3,6 +3,7 @@ import SelectBox from "../components/SelectBox";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { getComponents } from "../services/componentApi";
+import { FaCheck, FaTimes, FaClipboardList } from "react-icons/fa";
 
 function Builder() {
   const [cpu, setCpu] = useState(null);
@@ -114,8 +115,8 @@ function Builder() {
             {cpuMbCompat === null
               ? "Select"
               : cpuMbCompat
-                ? "✅ Compatible"
-                : "❌ Not Compatible"}
+                ? <FaCheck style={{ color: "green", marginLeft: "8px" }} />
+                : <FaTimes style={{ color: "red", marginLeft: "8px" }} />}
           </p>
 
           <p>
@@ -123,8 +124,8 @@ function Builder() {
             {ramCompat === null
               ? "Select"
               : ramCompat
-                ? "✅ Compatible"
-                : "❌ Not Compatible"}
+                ? <FaCheck style={{ color: "green", marginLeft: "8px" }} />
+                : <FaTimes style={{ color: "red", marginLeft: "8px" }} />}
           </p>
 
           <p>
@@ -132,8 +133,8 @@ function Builder() {
             {gpuPsuCompat === null
               ? "Select"
               : gpuPsuCompat
-                ? "✅ Compatible"
-                : "❌ Not Compatible"}
+                ? <FaCheck style={{ color: "green", marginLeft: "8px" }} />
+                : <FaTimes style={{ color: "red", marginLeft: "8px" }} />}
           </p>
         </div>
 
@@ -303,7 +304,7 @@ function Builder() {
               })
             }
           >
-            View Summary
+            <FaClipboardList style={{ marginRight: "8px" }} /> View Summary
           </button>
         </div>
       </div>

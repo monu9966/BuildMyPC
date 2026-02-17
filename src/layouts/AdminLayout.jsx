@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AdminNavbar from "../components/admin/AdminNavbar";
 
 export default function AdminLayout({
   dashboard,
@@ -10,23 +11,26 @@ export default function AdminLayout({
 
   return (
     <div className="admin-layout">
+      {/* NAVBAR */}
+      <AdminNavbar />
 
-      {/* SIDEBAR */}
-      <div className="admin-sidebar">
-        <h2 className="logo">BuildMyPC</h2>
+      {/* SIDEBAR + CONTENT WRAPPER */}
+      <div style={{ display: "flex", flex: 1 }}>
+        {/* SIDEBAR */}
+        <div className="admin-sidebar">
+          <button onClick={() => setTab("dashboard")}>📊 Dashboard</button>
+          <button onClick={() => setTab("components")}>🧩 Components</button>
+          <button onClick={() => setTab("users")}>👥 Users</button>
+          <button onClick={() => setTab("builds")}>🖥 Builds</button>
+        </div>
 
-        <button onClick={() => setTab("dashboard")}>📊 Dashboard</button>
-        <button onClick={() => setTab("components")}>🧩 Components</button>
-        <button onClick={() => setTab("users")}>👥 Users</button>
-        <button onClick={() => setTab("builds")}>🖥 Builds</button>
-      </div>
-
-      {/* CONTENT */}
-      <div className="admin-content">
-        {tab === "dashboard" && dashboard}
-        {tab === "components" && components}
-        {tab === "users" && users}
-        {tab === "builds" && builds}
+        {/* CONTENT */}
+        <div className="admin-content">
+          {tab === "dashboard" && dashboard}
+          {tab === "components" && components}
+          {tab === "users" && users}
+          {tab === "builds" && builds}
+        </div>
       </div>
     </div>
   );

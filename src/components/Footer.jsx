@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-// import "./Footer.css";
+import { FaHome, FaTools, FaSignInAlt, FaReact, FaServer, FaDatabase } from "react-icons/fa";
 
 function Footer() {
   return (
@@ -18,17 +18,17 @@ function Footer() {
         {/* Middle */}
         <div className="footer-section">
           <h4>Quick Links</h4>
-          <Link to="/">Home</Link>
-          <Link to="/builder">Builder</Link>
-          <Link to="/login">Login</Link>
+          <Link to="/"><FaHome style={{ marginRight: "8px" }} /> Home</Link>
+          <Link to="/builder"><FaTools style={{ marginRight: "8px" }} /> Builder</Link>
+          <Link to="/login"><FaSignInAlt style={{ marginRight: "8px" }} /> Login</Link>
         </div>
 
         {/* Right */}
         <div className="footer-section">
           <h4>Tech Stack</h4>
-          <p>React + Vite</p>
-          <p>Node.js + Express</p>
-          <p>MongoDB Atlas</p>
+          <p><FaReact style={{ marginRight: "8px" }} /> React + Vite</p>
+          <p><FaServer style={{ marginRight: "8px" }} /> Node.js + Express</p>
+          <p><FaDatabase style={{ marginRight: "8px" }} /> MongoDB Atlas</p>
         </div>
       </div>
 
