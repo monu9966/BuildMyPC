@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
 import Build from "../models/Build.js";
+import Component from "../models/Component.js";
 
 const router = express.Router();
 

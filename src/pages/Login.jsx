@@ -21,15 +21,12 @@ function Login() {
     }
 
     try {
-      const res = await loginUser({ email, password });
+      const { token, user: userData } = await loginUser({ email, password });
 
-      const token = res.data?.token || res.token;
-      const userData = res.data?.user || res.user;
-
-      if (token) {
-        localStorage.setItem("token", token);
+      if (token && userData) {
+        // AuthContext.login will now attach the token onto the user object
         login(userData, token);
-        if (userData.role === "admin") {
+        if (userData.role?.toLowerCase() === "admin") {
           navigate("/admin");
         } else {
           navigate("/");

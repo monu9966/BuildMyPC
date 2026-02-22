@@ -1,14 +1,25 @@
 import { Link, useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { FaHome, FaTools, FaShoppingCart, FaClipboardList, FaSignOutAlt, FaUserPlus, FaSignInAlt, FaBars, FaTimes, FaShieldAlt } from "react-icons/fa";
+import {
+  FaHome,
+  FaTools,
+  FaShoppingCart,
+  FaClipboardList,
+  FaSignOutAlt,
+  FaUserPlus,
+  FaSignInAlt,
+  FaBars,
+  FaTimes,
+  FaShieldAlt,
+} from "react-icons/fa";
 
 function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Helper function to close menu when a link is clicked
   const closeMenu = () => setMenuOpen(false);
 
   const handleLogout = () => {
@@ -16,16 +27,17 @@ function Navbar() {
     navigate("/login");
   };
 
+
   return (
     <nav className="navbar">
-      <h2 className="logo">BuildMyPC</h2>
-
-      {/* Hamburger icon */}
+      <Link to="/" className="logo-box">
+        <img src={logo} alt="BuildMyPC Logo" className="logo-img" />
+        <span className="logo-text">BuildMyPC</span>
+      </Link>
       <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
         {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
       </div>
 
-      {/* Nav links */}
       <div className={`nav-links ${menuOpen ? "open" : ""}`}>
         <Link to="/" onClick={() => setMenuOpen(false)} style={styles.link}>
           <FaHome style={{ marginRight: "8px" }} /> Home
@@ -49,11 +61,15 @@ function Navbar() {
             </Link>
 
             <Link to="/cart" style={styles.link}>
-              <FaShoppingCart style={{ marginRight: "8px" }} /> Cart
+              <FaShoppingCart style={{ marginRight: "8px" }} /> My Cart
             </Link>
 
             <Link to="/my-builds" onClick={() => setMenuOpen(false)}>
               <FaTools style={{ marginRight: "8px" }} /> MyBuild
+            </Link>
+
+            <Link to="/orders" onClick={() => setMenuOpen(false)}>
+              <FaTools style={{ marginRight: "8px" }} /> My Orders
             </Link>
 
             {/* ⭐ ADMIN BUTTON */}

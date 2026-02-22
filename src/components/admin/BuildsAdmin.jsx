@@ -23,6 +23,8 @@ export default function BuildsAdmin({ builds = [], refresh }) {
           ))}
         </tbody>
       </table>
+
+      
     </>
   );
 }

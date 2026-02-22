@@ -6,6 +6,7 @@ export default function AdminLayout({
   components,
   users,
   builds,
+  orders,
 }) {
   const [tab, setTab] = useState("dashboard");
 
@@ -22,6 +23,7 @@ export default function AdminLayout({
           <button onClick={() => setTab("components")}>🧩 Components</button>
           <button onClick={() => setTab("users")}>👥 Users</button>
           <button onClick={() => setTab("builds")}>🖥 Builds</button>
+          <button onClick={() => setTab("orders")}>📦 Orders</button>
         </div>
 
         {/* CONTENT */}
@@ -30,6 +32,7 @@ export default function AdminLayout({
           {tab === "components" && components}
           {tab === "users" && users}
           {tab === "builds" && builds}
+          {tab === "orders" && orders}
         </div>
       </div>
     </div>

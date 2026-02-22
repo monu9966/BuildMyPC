@@ -2,11 +2,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveBuild } from "../services/buildApi";
-import { useCart } from "../context/CartContext"
+import { useCart } from "../context/CartContext";
+import { saveCart } from "../services/cartApi";
+import { useAuth } from "../context/AuthContext"
 import { FaShoppingCart, FaEdit, FaSave, FaFilePdf } from "react-icons/fa";
 
 function Summary() {
   const { addToCart } = useCart();
+  const { user } = useAuth();
+
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,6 +50,7 @@ function Summary() {
     cabinet,
     monitor,
     totalPrice,
+    components: [cpu, motherboard, ram, storage, gpu, psu, cabinet, monitor],
   };
 
   // pdf download code
@@ -88,6 +93,25 @@ function Summary() {
     });
     alert("Build saved successfully!");
   };
+
+  const handleSaveCart = async () => {
+  await saveCart({
+    userId: user._id,
+    build: {
+      cpu,
+      motherboard,
+      ram,
+      storage,
+      gpu,
+      psu,
+      cabinet,
+      monitor,
+      totalPrice,
+    },
+  });
+
+  alert("Add to cart SucceFul!");
+};
 
   return (
     <div className="container">
@@ -174,13 +198,18 @@ function Summary() {
           <span>₹{totalPrice}</span>
         </div>
 
-        <button onClick={() => addToCart(buildData)}>
+        <button
+          onClick={() => {
+            addToCart(buildData);
+            handleSaveCart();
+          }}
+        >
           <FaShoppingCart style={{ marginRight: "8px" }} /> Add to Cart
         </button>
 
         <button
           className="buy btn"
-          onClick={() => navigate("/checkout", { state: buildData })}
+          onClick={() => navigate("/Cart", { state: buildData })}
         >
           <FaShoppingCart style={{ marginRight: "8px" }} /> Buy Now
         </button>

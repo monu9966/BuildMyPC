@@ -70,41 +70,24 @@ function Builder() {
         <h2 className="builder-title">PC Builder</h2>
 
         {/* Select sections */}
-        <div className="builder-card">
-          <SelectBox title="CPU" options={cpus} onSelect={setCpu} />
-        </div>
 
-        <div className="builder-card">
-          <SelectBox
-            title="Motherboard"
-            options={motherboards}
-            onSelect={setMotherboard}
-          />
-        </div>
-
-        <div className="builder-card">
-          <SelectBox title="RAM" options={rams} onSelect={setRam} />
-        </div>
-
-        <div className="builder-card">
-          <SelectBox title="Storage" options={storages} onSelect={setStorage} />
-        </div>
-
-        <div className="builder-card">
-          <SelectBox title="GPU" options={gpus} onSelect={setGpu} />
-        </div>
-
-        <div className="builder-card">
-          <SelectBox title="Power Supply" options={psus} onSelect={setPsu} />
-        </div>
-
-        <div className="builder-card">
-          <SelectBox title="Cabinet" options={cabinets} onSelect={setCabinet} />
-        </div>
-
-        <div className="builder-card">
-          <SelectBox title="Monitor" options={monitors} onSelect={setMonitor} />
-        </div>
+        <SelectBox
+          className="builder-card"
+          title="CPU"
+          options={cpus}
+          onSelect={setCpu}
+        />
+        <SelectBox
+          title="Motherboard"
+          options={motherboards}
+          onSelect={setMotherboard}
+        />
+        <SelectBox title="RAM" options={rams} onSelect={setRam} />
+        <SelectBox title="Storage" options={storages} onSelect={setStorage} />
+        <SelectBox title="GPU" options={gpus} onSelect={setGpu} />
+        <SelectBox title="Power Supply" options={psus} onSelect={setPsu} />
+        <SelectBox title="Cabinet" options={cabinets} onSelect={setCabinet} />
+        <SelectBox title="Monitor" options={monitors} onSelect={setMonitor} />
 
         {/* Compatibility */}
         <div className="compatibility-box">
@@ -112,29 +95,35 @@ function Builder() {
 
           <p>
             CPU & Motherboard:{" "}
-            {cpuMbCompat === null
-              ? "Select"
-              : cpuMbCompat
-                ? <FaCheck style={{ color: "green", marginLeft: "8px" }} />
-                : <FaTimes style={{ color: "red", marginLeft: "8px" }} />}
+            {cpuMbCompat === null ? (
+              "Select"
+            ) : cpuMbCompat ? (
+              <FaCheck style={{ color: "green", marginLeft: "8px" }} />
+            ) : (
+              <FaTimes style={{ color: "red", marginLeft: "8px" }} />
+            )}
           </p>
 
           <p>
             RAM & Motherboard:{" "}
-            {ramCompat === null
-              ? "Select"
-              : ramCompat
-                ? <FaCheck style={{ color: "green", marginLeft: "8px" }} />
-                : <FaTimes style={{ color: "red", marginLeft: "8px" }} />}
+            {ramCompat === null ? (
+              "Select"
+            ) : ramCompat ? (
+              <FaCheck style={{ color: "green", marginLeft: "8px" }} />
+            ) : (
+              <FaTimes style={{ color: "red", marginLeft: "8px" }} />
+            )}
           </p>
 
           <p>
             GPU & PSU:{" "}
-            {gpuPsuCompat === null
-              ? "Select"
-              : gpuPsuCompat
-                ? <FaCheck style={{ color: "green", marginLeft: "8px" }} />
-                : <FaTimes style={{ color: "red", marginLeft: "8px" }} />}
+            {gpuPsuCompat === null ? (
+              "Select"
+            ) : gpuPsuCompat ? (
+              <FaCheck style={{ color: "green", marginLeft: "8px" }} />
+            ) : (
+              <FaTimes style={{ color: "red", marginLeft: "8px" }} />
+            )}
           </p>
         </div>
 
