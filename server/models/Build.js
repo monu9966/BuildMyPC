@@ -1,24 +1,35 @@
 import mongoose from "mongoose";
 
-const buildSchema = new mongoose.Schema({
+const buildSchema = new mongoose.Schema(
+  {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
 
-    components: {
-        cpu: Object,
-        motherboard: Object,
-        ram: Object,
-        storage: Object,
-        gpu: Object,
-        psu: Object,
-        cabinet: Object,
-        monitor: Object,
-    },
-    
+    components: [
+      {
+        typeId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ComponentType",
+        },
+
+        typeName: String,   // CPU / Mouse / Keyboard etc
+        componentId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Component",
+        },
+
+        name: String,
+        price: Number,
+        image: String,
+      }
+    ],
+
     totalPrice: Number,
-}, { timestamps: true });
+  },
+  { timestamps: true }
+);
 
 export default mongoose.model("Build", buildSchema);

@@ -8,8 +8,10 @@ import authRoutes from "./routes/authRoutes.js";
 import buildRoutes from "./routes/buildRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import componentRoutes from "./routes/componentRoutes.js";
+import componentTypeRoutes from "./routes/componentType.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,9 +25,11 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/builds", buildRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/components", componentRoutes);
+app.use("/api/component-types", componentTypeRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);

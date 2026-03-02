@@ -1,304 +1,115 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import SelectBox from "../components/SelectBox";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { getComponents } from "../services/componentApi";
+import axios from "axios";
 import { FaCheck, FaTimes, FaClipboardList } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
-function Builder() {
-  const [cpu, setCpu] = useState(null);
-  const [motherboard, setMotherboard] = useState(null);
-  const [ram, setRam] = useState(null);
-  const [storage, setStorage] = useState(null);
-  const [gpu, setGpu] = useState(null);
-  const [psu, setPsu] = useState(null);
-  const [cabinet, setCabinet] = useState(null);
-  const [monitor, setMonitor] = useState(null);
-
-  const [cpus, setCpus] = useState([]);
-  const [motherboards, setMotherboards] = useState([]);
-  const [rams, setRams] = useState([]);
-  const [gpus, setGpus] = useState([]);
-  const [storages, setStorages] = useState([]);
-  const [psus, setPsus] = useState([]);
-  const [cabinets, setCabinets] = useState([]);
-  const [monitors, setMonitors] = useState([]);
-
-  const location = useLocation();
-  const usage = location.state?.usage;
+export default function Builder() {
+  const [types, setTypes] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [selected, setSelected] = useState({});
+  const [openBox, setOpenBox] = useState(null);
   const navigate = useNavigate();
 
+  /* ===== Fetch data ===== */
   useEffect(() => {
-    const fetchData = async () => {
-      setCpus((await getComponents("CPU")).data);
-      setMotherboards((await getComponents("Motherboard")).data);
-      setRams((await getComponents("RAM")).data);
-      setGpus((await getComponents("GPU")).data);
-      setStorages((await getComponents("Storage")).data);
-      setPsus((await getComponents("PSU")).data);
-      setCabinets((await getComponents("Cabinet")).data);
-      setMonitors((await getComponents("Monitor")).data);
-    };
+    const load = async () => {
+      const [typesRes, prodRes] = await Promise.all([
+        axios.get("/api/component-types"),
+        axios.get("/api/components"),
+      ]);
 
-    fetchData();
+      setTypes(typesRes.data || []);
+      setProducts(prodRes.data?.data || prodRes.data || []);
+    };
+    load();
   }, []);
 
-  // Total Price Calculation
-  const totalPrice = useMemo(() => {
-    return (
-      (cpu?.price || 0) +
-      (motherboard?.price || 0) +
-      (ram?.price || 0) +
-      (storage?.price || 0) +
-      (gpu?.price || 0) +
-      (psu?.price || 0) +
-      (cabinet?.price || 0) +
-      (monitor?.price || 0)
-    );
-  }, [cpu, motherboard, ram, storage, gpu, psu, cabinet, monitor]);
+  /* ===== Select Component ===== */
+  const handleSelect = (type, item) => {
+    setSelected((prev) => ({ ...prev, [type]: item }));
+  };
 
-  // Compatibility rules
-  const cpuMbCompat =
-    cpu && motherboard ? cpu.socket === motherboard.socket : null;
-  const ramCompat =
-    ram && motherboard ? ram.type === motherboard.ramType : null;
+  /* ===== Total Price ===== */
+  const totalPrice = Object.values(selected).reduce(
+    (sum, p) => sum + (p?.price || 0),
+    0,
+  );
+
+  /* ===== Compatibility ===== */
+  const cpu = selected.CPU;
+  const mb = selected.Motherboard;
+  const ram = selected.RAM;
+  const gpu = selected.GPU;
+  const psu = selected.PSU;
+
+  const cpuMbCompat = cpu && mb ? cpu.socket === mb.socket : null;
+  const ramCompat = ram && mb ? ram.type === mb.ramType : null;
   const gpuPsuCompat = gpu && psu ? psu.watt >= gpu.watt : null;
 
   return (
     <div className="builder-page">
-      <div className="builder-container">
-        <h2 className="builder-title">PC Builder</h2>
+      {/* LEFT SIDE */}
+      <div className="builder-left">
+        <h2>🖥️ Build Your Custom PC</h2>
 
-        {/* Select sections */}
+        {types.map((type) => (
+          <SelectBox
+            title={type.name}
+            options={products.filter((p) => p.type === type.name)}
+            selected={selected[type.name]}
+            onSelect={(item) => handleSelect(type.name, item)}
+            isOpen={openBox === type.name}
+            setOpenBox={setOpenBox}
+          />
+        ))}
+      </div>
 
-        <SelectBox
-          className="builder-card"
-          title="CPU"
-          options={cpus}
-          onSelect={setCpu}
-        />
-        <SelectBox
-          title="Motherboard"
-          options={motherboards}
-          onSelect={setMotherboard}
-        />
-        <SelectBox title="RAM" options={rams} onSelect={setRam} />
-        <SelectBox title="Storage" options={storages} onSelect={setStorage} />
-        <SelectBox title="GPU" options={gpus} onSelect={setGpu} />
-        <SelectBox title="Power Supply" options={psus} onSelect={setPsu} />
-        <SelectBox title="Cabinet" options={cabinets} onSelect={setCabinet} />
-        <SelectBox title="Monitor" options={monitors} onSelect={setMonitor} />
+      {/* RIGHT SIDE SUMMARY */}
+      <div className="builder-right">
+        <h3>Compatibility</h3>
+        <CompatRow label="CPU & Motherboard" ok={cpuMbCompat} />
+        <CompatRow label="RAM & Motherboard" ok={ramCompat} />
+        <CompatRow label="GPU & PSU" ok={gpuPsuCompat} />
 
-        {/* Compatibility */}
-        <div className="compatibility-box">
-          <h3>Compatibility Status</h3>
+        <h3>Selected Parts</h3>
+        {types.map((type) => {
+          const item = selected[type.name];
+          return (
+            <div key={type._id} className="summary-row">
+              {type.name}
+              <span>{item?.name || "Not selected"}</span>
+              <span>₹{item?.price || 0}</span>
+            </div>
+          );
+        })}
 
-          <p>
-            CPU & Motherboard:{" "}
-            {cpuMbCompat === null ? (
-              "Select"
-            ) : cpuMbCompat ? (
-              <FaCheck style={{ color: "green", marginLeft: "8px" }} />
-            ) : (
-              <FaTimes style={{ color: "red", marginLeft: "8px" }} />
-            )}
-          </p>
+        <h2>Total ₹{totalPrice}</h2>
 
-          <p>
-            RAM & Motherboard:{" "}
-            {ramCompat === null ? (
-              "Select"
-            ) : ramCompat ? (
-              <FaCheck style={{ color: "green", marginLeft: "8px" }} />
-            ) : (
-              <FaTimes style={{ color: "red", marginLeft: "8px" }} />
-            )}
-          </p>
-
-          <p>
-            GPU & PSU:{" "}
-            {gpuPsuCompat === null ? (
-              "Select"
-            ) : gpuPsuCompat ? (
-              <FaCheck style={{ color: "green", marginLeft: "8px" }} />
-            ) : (
-              <FaTimes style={{ color: "red", marginLeft: "8px" }} />
-            )}
-          </p>
-        </div>
-
-        {/* Selected components */}
-        <div className="selected-list">
-          <h3>Selected Components</h3>
-
-          <ul>
-            <li>
-              <div className="price-row">
-                <span>
-                  {" "}
-                  <b>CPU:</b> {cpu?.name || "Not selected"}{" "}
-                </span>
-                <span>₹{cpu?.price || 0}</span>
-              </div>
-
-              {cpu?.image && (
-                <img
-                  src={cpu.image}
-                  alt="cpu"
-                  style={{ width: "120px", marginTop: "10px" }}
-                />
-              )}
-            </li>
-            <li>
-              <div className="price-row">
-                <span>
-                  {" "}
-                  <b>Motherboard:</b> {motherboard?.name || "Not selected"}{" "}
-                </span>
-                <span>₹{motherboard?.price || 0}</span>
-              </div>
-              {motherboard?.image && (
-                <img
-                  src={motherboard.image}
-                  alt="motherboard"
-                  style={{ width: "120px", marginTop: "10px" }}
-                />
-              )}
-            </li>
-            <li>
-              <div className="price-row">
-                <span>
-                  {" "}
-                  <b>RAM:</b> {ram?.name || "Not selected"}{" "}
-                </span>
-                <span>₹{ram?.price || 0}</span>
-              </div>
-              {ram?.image && (
-                <img
-                  src={ram.image}
-                  alt="ram"
-                  style={{ width: "120px", marginTop: "10px" }}
-                />
-              )}
-            </li>
-            <li>
-              <div className="price-row">
-                <span>
-                  <b>Storage:</b> {storage?.name || "Not selected"}{" "}
-                </span>
-                <span>₹{storage?.price || 0}</span>
-              </div>
-              {storage?.image && (
-                <img
-                  src={storage.image}
-                  alt="storage"
-                  style={{ width: "120px", marginTop: "10px" }}
-                />
-              )}
-            </li>
-            <li>
-              <div className="price-row">
-                <span>
-                  {" "}
-                  <b>GPU:</b> {gpu?.name || "Not selected"}{" "}
-                </span>
-                <span>₹{gpu?.price || 0}</span>
-              </div>
-              {gpu?.image && (
-                <img
-                  src={gpu.image}
-                  alt="gpu"
-                  style={{ width: "120px", marginTop: "10px" }}
-                />
-              )}
-            </li>
-            <li>
-              <div className="price-row">
-                <span>
-                  {" "}
-                  <b>PSU:</b> {psu?.name || "Not selected"}{" "}
-                </span>
-                <span>₹{psu?.price || 0}</span>
-              </div>
-              {psu?.image && (
-                <img
-                  src={psu.image}
-                  alt="psu"
-                  style={{ width: "120px", marginTop: "10px" }}
-                />
-              )}
-            </li>
-            <li>
-              <div className="price-row">
-                <span>
-                  {" "}
-                  <b>Cabinet:</b> {cabinet?.name || "Not selected"}{" "}
-                </span>
-                <span>₹{cabinet?.price || 0}</span>
-              </div>
-              {cabinet?.image && (
-                <img
-                  src={cabinet.image}
-                  alt="cabinet"
-                  style={{ width: "120px", marginTop: "10px" }}
-                />
-              )}
-            </li>
-            <li>
-              <div className="price-row">
-                <span>
-                  {" "}
-                  <b>Monitor:</b> {monitor?.name || "Not selected"}{" "}
-                </span>
-                <span>₹{monitor?.price || 0}</span>
-              </div>
-              {monitor?.image && (
-                <img
-                  src={monitor.image}
-                  alt="monitor"
-                  style={{ width: "120px", marginTop: "10px" }}
-                />
-              )}
-            </li>
-          </ul>
-
-          <hr />
-
-          <div className="price-row total-row">
-            <span>Total Price:</span>
-            <span>₹{totalPrice}</span>
-          </div>
-        </div>
-
-        {/* Price */}
-        <div className="price-box">
-          <h2>Total Price</h2>
-          <div className="price-value">₹{totalPrice}</div>
-
-          <button
-            className="summary-btn"
-            onClick={() =>
-              navigate("/summary", {
-                state: {
-                  cpu,
-                  motherboard,
-                  ram,
-                  storage,
-                  gpu,
-                  psu,
-                  cabinet,
-                  monitor,
-                  totalPrice,
-                },
-              })
-            }
-          >
-            <FaClipboardList style={{ marginRight: "8px" }} /> View Summary
-          </button>
-        </div>
+        <button
+          className="summary-btn"
+          onClick={() =>
+            navigate("/summary", { state: { selected, totalPrice } })
+          }
+        >
+          <FaClipboardList /> View Summary
+        </button>
       </div>
     </div>
   );
 }
 
-export default Builder;
+function CompatRow({ label, ok }) {
+  return (
+    <div className="compat-row">
+      {label} :
+      {ok === null ? (
+        " Select"
+      ) : ok ? (
+        <FaCheck color="green" />
+      ) : (
+        <FaTimes color="red" />
+      )}
+    </div>
+  );
+}

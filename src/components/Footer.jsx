@@ -1,35 +1,59 @@
 import { Link } from "react-router-dom";
-import { FaHome, FaTools, FaSignInAlt, FaReact, FaServer, FaDatabase } from "react-icons/fa";
+import {
+  FaHome,
+  FaTools,
+  FaSignInAlt,
+  FaReact,
+  FaServer,
+  FaDatabase,
+  FaGithub,
+  FaLinkedin,
+  FaEnvelope,
+} from "react-icons/fa";
 
-function Footer() {
+export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer-container">
 
-        {/* Left */}
+        {/* About */}
         <div className="footer-section">
-          <h3>BuildMyPC 💻</h3>
+          <h2>BuildMyPC 💻</h2>
           <p>
             Smart PC customization platform to build compatible
             computers within your budget.
           </p>
+
+          <div className="socials">
+            <a href="#"><FaGithub /></a>
+            <a href="#"><FaLinkedin /></a>
+            <a href="#"><FaEnvelope /></a>
+          </div>
         </div>
 
-        {/* Middle */}
+        {/* Links */}
         <div className="footer-section">
-          <h4>Quick Links</h4>
-          <Link to="/"><FaHome style={{ marginRight: "8px" }} /> Home</Link>
-          <Link to="/builder"><FaTools style={{ marginRight: "8px" }} /> Builder</Link>
-          <Link to="/login"><FaSignInAlt style={{ marginRight: "8px" }} /> Login</Link>
+          <h3>Quick Links</h3>
+          <Link to="/"><FaHome /> Home</Link>
+          <Link to="/builder"><FaTools /> Builder</Link>
+          <Link to="/login"><FaSignInAlt /> Login</Link>
         </div>
 
-        {/* Right */}
+        {/* Tech Stack */}
         <div className="footer-section">
-          <h4>Tech Stack</h4>
-          <p><FaReact style={{ marginRight: "8px" }} /> React + Vite</p>
-          <p><FaServer style={{ marginRight: "8px" }} /> Node.js + Express</p>
-          <p><FaDatabase style={{ marginRight: "8px" }} /> MongoDB Atlas</p>
+          <h3>Tech Stack</h3>
+          <p><FaReact /> React + Vite</p>
+          <p><FaServer /> Node.js + Express</p>
+          <p><FaDatabase /> MongoDB Atlas</p>
         </div>
+
+        {/* Contact */}
+        <div className="footer-section">
+          <h3>Contact</h3>
+          <p>Email: monukumar.dev@gmail.com</p>
+          <p>Mumbai, India 🇮🇳</p>
+        </div>
+
       </div>
 
       <div className="footer-bottom">
@@ -38,6 +62,3 @@ function Footer() {
     </footer>
   );
 }
-
-export default Footer;
-   

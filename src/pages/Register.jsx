@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { registerUser } from "../services/authApi";
+import { registerUser } from "../services/endpoints";
 import { FaUserPlus, FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 
 function Register() {
@@ -11,7 +11,7 @@ function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
-    e.preventDefault(); // ⭐ VERY IMPORTANT
+    e.preventDefault();
 
     if (!name || !email || !password) {
       alert("All fields required");
@@ -21,7 +21,7 @@ function Register() {
     try {
       await registerUser({ name, email, password });
 
-      alert("Registration successful. Please login.");
+      alert("✅ Registration successful. Please login.");
       navigate("/login");
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");

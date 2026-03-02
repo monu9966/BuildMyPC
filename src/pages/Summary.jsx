@@ -1,21 +1,38 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { saveBuild } from "../services/buildApi";
+import { saveBuild } from "../services/endpoints";
 import { useCart } from "../context/CartContext";
-import { saveCart } from "../services/cartApi";
-import { useAuth } from "../context/AuthContext"
+import { saveCart } from "../services/endpoints";
+import { useAuth } from "../context/AuthContext";
+import { useBuild } from "../context/BuildContext";
 import { FaShoppingCart, FaEdit, FaSave, FaFilePdf } from "react-icons/fa";
+import axios from "axios";
 
 function Summary() {
   const { addToCart } = useCart();
   const { user } = useAuth();
 
+  const { selectedParts } = useBuild();
+  const [types, setTypes] = useState([]);
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const build = location.state;
+
+  useEffect(() => {
+    axios
+      .get("/api/component-types")
+      .then((res) => setTypes(res.data))
+      .catch((err) => console.log(err));
+  }, []);
+
+  const total = Object.values(selectedParts).reduce(
+    (sum, item) => sum + (item?.price || 0),
+    0,
+  );
 
   if (!build) {
     return (
@@ -95,101 +112,46 @@ function Summary() {
   };
 
   const handleSaveCart = async () => {
-  await saveCart({
-    userId: user._id,
-    build: {
-      cpu,
-      motherboard,
-      ram,
-      storage,
-      gpu,
-      psu,
-      cabinet,
-      monitor,
-      totalPrice,
-    },
-  });
+    await saveCart({
+      userId: user._id,
+      build: {
+        cpu,
+        motherboard,
+        ram,
+        storage,
+        gpu,
+        psu,
+        cabinet,
+        monitor,
+        totalPrice,
+      },
+    });
 
-  alert("Add to cart SucceFul!");
-};
+    alert("Add to cart SucceFul!");
+  };
 
   return (
     <div className="container">
       <div className="card">
         <h2>PC Build Summary</h2>
-        <ul>
-          <li>
-            <div className="price-row">
-              <span>
-                {" "}
-                <b>CPU:</b> {cpu?.name || "Not selected"}{" "}
-              </span>
-              <span>₹{cpu?.price || 0}</span>
-            </div>
-          </li>
-          <li>
-            <div className="price-row">
-              <span>
-                {" "}
-                <b>Motherboard:</b> {motherboard?.name || "Not selected"}{" "}
-              </span>
-              <span>₹{motherboard?.price || 0}</span>
-            </div>
-          </li>
-          <li>
-            <div className="price-row">
-              <span>
-                {" "}
-                <b>RAM:</b> {ram?.name || "Not selected"}{" "}
-              </span>
-              <span>₹{ram?.price || 0}</span>
-            </div>
-          </li>
-          <li>
-            <div className="price-row">
-              <span>
-                <b>Storage:</b> {storage?.name || "Not selected"}{" "}
-              </span>
-              <span>₹{storage?.price || 0}</span>
-            </div>
-          </li>
-          <li>
-            <div className="price-row">
-              <span>
-                {" "}
-                <b>GPU:</b> {gpu?.name || "Not selected"}{" "}
-              </span>
-              <span>₹{gpu?.price || 0}</span>
-            </div>
-          </li>
-          <li>
-            <div className="price-row">
-              <span>
-                {" "}
-                <b>PSU:</b> {psu?.name || "Not selected"}{" "}
-              </span>
-              <span>₹{psu?.price || 0}</span>
-            </div>
-          </li>
-          <li>
-            <div className="price-row">
-              <span>
-                {" "}
-                <b>Cabinet:</b> {cabinet?.name || "Not selected"}{" "}
-              </span>
-              <span>₹{cabinet?.price || 0}</span>
-            </div>
-          </li>
-          <li>
-            <div className="price-row">
-              <span>
-                {" "}
-                <b>Monitor:</b> {monitor?.name || "Not selected"}{" "}
-              </span>
-              <span>₹{monitor?.price || 0}</span>
-            </div>
-          </li>
-        </ul>
+
+        <div className="price-box">
+          <h2>Selected Components</h2>
+
+          {types.map((type) => {
+            const item = selectedParts[type.name];
+
+            return (
+              <div key={type._id} className="summary-row">
+                <b>{type.name}</b> :{item ? item.name : "Not selected"}
+                <span> ₹{item ? item.price : 0}</span>
+              </div>
+            );
+          })}
+
+          <h3>Total Price: ₹{total}</h3>
+        </div>
+
 
         <hr />
 

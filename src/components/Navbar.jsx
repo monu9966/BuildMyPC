@@ -1,7 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { useState } from "react";
+import defaultAvatar from "../assets/default-avatar.png";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
+import { API } from "../services/api";
 import {
   FaHome,
   FaTools,
@@ -15,122 +17,165 @@ import {
   FaShieldAlt,
 } from "react-icons/fa";
 
-function Navbar() {
+export default function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-
+  const [dropOpen, setDropOpen] = useState(false);
+  const navRef = useRef(null); 
   const closeMenu = () => setMenuOpen(false);
 
   const handleLogout = () => {
     logout();
+    closeMenu();
     navigate("/login");
   };
 
+useEffect(() => {
+  function handleClickOutside(event) {
+    if (navRef.current && !navRef.current.contains(event.target)) {
+      setMenuOpen(false);
+      setDropOpen(false);   
+    }
+  }
 
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
+  // helper to convert server-relative avatar path into full URL
+  const avatarUrl = (path) => {
+    if (!path) return "/default.png";
+    if (path.startsWith("http")) return path;
+    // remove trailing "/api" from baseURL
+    const base = API.defaults.baseURL.replace(/\/api$/, "");
+    return `${base}${path}`;
+  };
   return (
-    <nav className="navbar">
-      <Link to="/" className="logo-box">
+    <nav className="navbar" ref={navRef}>
+      {/* Logo */}
+      <Link to="/" className="logo-box" onClick={closeMenu}>
         <img src={logo} alt="BuildMyPC Logo" className="logo-img" />
         <span className="logo-text">BuildMyPC</span>
       </Link>
+
+      {/* Hamburger */}
       <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
-        {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        {menuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
       </div>
 
+      {/* Links */}
       <div className={`nav-links ${menuOpen ? "open" : ""}`}>
-        <Link to="/" onClick={() => setMenuOpen(false)} style={styles.link}>
-          <FaHome style={{ marginRight: "8px" }} /> Home
-        </Link>
-        <Link
+        <NavItem to="/" icon={<FaHome />} text="Home" onClick={closeMenu} />
+        <NavItem
           to="/builder"
-          onClick={() => setMenuOpen(false)}
-          style={styles.link}
-        >
-          <FaTools style={{ marginRight: "8px" }} /> PC Builder
-        </Link>
+          icon={<FaTools />}
+          text="PC Builder"
+          onClick={closeMenu}
+        />
 
         {user && (
           <>
-            <Link
-              to="/summary"
-              onClick={() => setMenuOpen(false)}
-              style={styles.link}
-            >
-              <FaClipboardList style={{ marginRight: "8px" }} /> View Summary
-            </Link>
+            <NavItem
+              to="/cart"
+              icon={<FaShoppingCart />}
+              text="My Cart"
+              onClick={closeMenu}
+            />
 
-            <Link to="/cart" style={styles.link}>
-              <FaShoppingCart style={{ marginRight: "8px" }} /> My Cart
-            </Link>
-
-            <Link to="/my-builds" onClick={() => setMenuOpen(false)}>
-              <FaTools style={{ marginRight: "8px" }} /> MyBuild
-            </Link>
-
-            <Link to="/orders" onClick={() => setMenuOpen(false)}>
-              <FaTools style={{ marginRight: "8px" }} /> My Orders
-            </Link>
-
-            {/* ⭐ ADMIN BUTTON */}
-            {user?.role === "admin" && (
-              <Link to="/admin" onClick={closeMenu} style={styles.link}>
-                <FaShieldAlt style={{ marginRight: "8px" }} /> Admin
-              </Link>
+            {user.role === "admin" && (
+              <NavItem
+                to="/admin"
+                icon={<FaShieldAlt />}
+                text="Admin"
+                onClick={closeMenu}
+              />
             )}
           </>
         )}
 
         {user ? (
-          <>
-            <span className="nav-user">Hi, {user.name} 👋</span>
-            <button onClick={handleLogout} className="logout-btn">
-              <FaSignOutAlt style={{ marginRight: "8px" }} /> Logout
-            </button>
-          </>
+          <div className="user-dropdown">
+            <div
+              className="user-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDropOpen((o) => !o);
+              }}
+            >
+              <span className="user-name">Hi, {user.name} 👋</span>
+              <img
+                src={avatarUrl(user.avatar)}
+                className="nav-avatar"
+                alt="avatar"
+              />
+            </div>
+
+            {dropOpen && (
+              <div className="dropdown-menu">
+                <NavItem
+                  to="/profile"
+                  text="👤Profile"
+                  onClick={() => {
+                    closeMenu();
+                    setDropOpen(false);
+                  }}
+                />
+                <NavItem
+                  to="/orders"
+                  icon={<FaClipboardList />}
+                  text="Orders"
+                  onClick={() => {
+                    closeMenu();
+                    setDropOpen(false);
+                  }}
+                />
+                <NavItem
+                  to="/my-builds"
+                  icon={<FaTools />}
+                  text="My Builds"
+                  onClick={() => {
+                    closeMenu();
+                    setDropOpen(false);
+                  }}
+                />
+
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setDropOpen(false);
+                  }}
+                  className="logout-btn"
+                >
+                  <FaSignOutAlt /> Logout
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
-          <>
-            <Link
-              to="/register"
-              onClick={() => setMenuOpen(false)}
-              style={styles.signupBtn}
-            >
-              <FaUserPlus style={{ marginRight: "8px" }} /> Sign Up
-            </Link>
-            <Link
-              to="/login"
-              onClick={() => setMenuOpen(false)}
-              style={styles.link}
-            >
-              <FaSignInAlt style={{ marginRight: "8px" }} /> Login
-            </Link>
-          </>
+<div className="auth-buttons">
+  <Link to="/login" className="login-btn" onClick={closeMenu}>
+    <FaSignInAlt /> Login
+  </Link>
+
+  <Link to="/register" className="signup-btn" onClick={closeMenu}>
+    <FaUserPlus /> Sign Up
+  </Link>
+</div>
         )}
       </div>
     </nav>
   );
 }
 
-const styles = {
-  link: {
-    color: "#fff",
-    marginLeft: "20px",
-    textDecoration: "none",
-    fontWeight: "bold",
-  },
-  authGroup: {
-    display: "inline-flex",
-    alignItems: "center",
-  },
-  signupBtn: {
-    // backgroundColor: "#07e37c", // Green color to match your "View Summary" button
-    color: "white",
-    // padding: "8px 16px",
-    borderRadius: "5px",
-    marginLeft: "20px",
-    textDecoration: "none",
-    fontWeight: "bold",
-  },
-};
-
-export default Navbar;
+/* Reusable Link Component */
+function NavItem({ to, icon, text, onClick }) {
+  return (
+    <Link to={to} className="nav-item" onClick={onClick}>
+      {icon}
+      <span>{text}</span>
+    </Link>
+  );
+}

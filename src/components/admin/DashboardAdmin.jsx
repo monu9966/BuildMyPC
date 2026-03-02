@@ -1,56 +1,94 @@
 import { useState, useEffect } from "react";
-import { getBuilds, getUsers } from "../../services/adminApi";
-import { getComponents } from "../../services/componentApi";
+import {
+  getUsers,
+  getOrders,
+  getBuilds,
+  getComponentTypes,
+  getComponents,
+} from "../../services/endpoints";
 
 export default function DashboardAdmin({ dashboard = [], refresh }) {
-    const [stats, setStats] = useState({
-        users: 0,
-        builds: 0,
-        revenue: 0,
-    });
+  const [stats, setStats] = useState({
+    users: 0,
+    componentTypes: 0,
+    components: 0,
+    orders: 0,
+    builds: 0,
+    revenue: 0,
+  });
 
-  
-    const loadData = async () => {
-      try {
-        const u = await getUsers();
-        const b = await getBuilds();
-        const c = await getComponents();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-        const totalRevenue = b.data.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+  const loadData = async () => {
+    try {
+      setLoading(true);
 
-        setStats({
-          users: Array.isArray(u.data) ? u.data.length : 0,
-          builds: Array.isArray(b.data) ? b.data.length : 0,
-          revenue: totalRevenue,
-        });
-      } catch (err) {
-        console.error("Failed to load admin dashboard data:", err);
-      }
-    };
+      const [u, o, b, c, t] = await Promise.all([
+        getUsers(),
+        getOrders(),
+        getBuilds(),
+        getComponents(),
+        getComponentTypes(),
+      ]);
 
-    useEffect(() => {
-      loadData();
-    }, [refresh]);
+      const users = Array.isArray(u.data) ? u.data.length : 0;
+      const orders = Array.isArray(o.data) ? o.data.length : 0;
+      const builds = Array.isArray(b.data) ? b.data.length : 0;
+      const components = Array.isArray(c.data) ? c.data.length : 0;
+      const componentTypes = Array.isArray(t.data) ? t.data.length : 0;
+
+      const revenue = Array.isArray(o.data)
+        ? o.data.reduce((sum, item) => sum + (item.totalPrice || 0), 0)
+        : 0;
+
+      setStats({
+        users,
+        orders,
+        builds,
+        components,
+        componentTypes,
+        revenue,
+      });
+
+      setError("");
+    } catch (err) {
+      console.error("admin dashboard data load Error:", err);
+      setError("Failed to load data. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [refresh]);
+
+  if (loading) return <h3>Loading dashboard...</h3>;
+  if (error) return <h3 style={{ color: "red" }}>{error}</h3>;
 
   return (
-    <>
+    <div className="admin-container">
       <h2>Welcome Admin 👑</h2>
+
       <div className="stats-grid">
-        <div className="stat-card">
-          <h4>👥 Users</h4>
-          <h2>{stats.users}</h2>
-        </div>
-
-        <div className="stat-card">
-          <h4>🖥 Builds</h4>
-          <h2>{stats.builds}</h2>
-        </div>
-
-        <div className="stat-card">
-          <h4>💰 Revenue</h4>
-          <h2>₹{stats.revenue}</h2>
-        </div>
+        <Stat title="👥 Users" value={stats.users} />
+        <Stat title="📦 Orders" value={stats.orders} />
+        <Stat title="🖥 Builds" value={stats.builds} />
+        <Stat title="🧩 Components" value={stats.components} />
+        <Stat title="⚙️ Component Types" value={stats.componentTypes} />
+        <Stat title="💰 Revenue" value={`₹${stats.revenue}`} />
       </div>
-    </>
+    </div>
   );
 }
+
+function Stat({ title, value }) {
+  return (
+    <div className="stat-card">
+      <h4>{title}</h4>
+      <h2>{value}</h2>
+    </div>
+  );
+}
+

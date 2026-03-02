@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import AdminLayout from "../layouts/AdminLayout";
 import DashboardAdmin from "../components/admin/DashboardAdmin";
 import ComponentsAdmin from "../components/admin/ComponentsAdmin";
+import AdminComponentTypes from "../components/admin/AdminComponentTypes";
 import UsersAdmin from "../components/admin/UsersAdmin";
 import BuildsAdmin from "../components/admin/BuildsAdmin";
 import OrdersAdmin from "../components/admin/OrdersAdmin";
-import { getComponents } from "../services/componentApi";
-import { getUsers, getBuilds, getOrders } from "../services/adminApi";
+import { getUsers, getBuilds, getOrders, getComponents, getComponentTypes } from "../services/endpoints";
 
 export default function Admin() {
   const [dashboard, setDashboard] = useState([]);
@@ -41,7 +41,8 @@ export default function Admin() {
   return (
     <AdminLayout
       dashboard={<DashboardAdmin dashboard={dashboard} refresh={loadData} />}
-      components={<ComponentsAdmin components={components} refresh={loadData} />}
+      components={<ComponentsAdmin refresh={loadData} />} 
+      componentTypes={<AdminComponentTypes />}
       users={<UsersAdmin users={users} refresh={loadData} />}
       builds={<BuildsAdmin builds={builds} refresh={loadData} />}
       orders={<OrdersAdmin orders={orders} refresh={loadData} />}

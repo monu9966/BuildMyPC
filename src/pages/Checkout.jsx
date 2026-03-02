@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { placeCODOrder } from "../services/orderApi";
+import { placeCODOrder } from "../services/endpoints";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext"; 
 import gpay from "../assets/payments/gpay.png";
@@ -17,7 +17,6 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  // state may come from cart (array) or a single build (object) when clicking "Buy Now"
   const cart = Array.isArray(state) ? state : state ? [state] : [];
 
   const totalPrice = cart.reduce((sum, b) => sum + (b.totalPrice || 0), 0);

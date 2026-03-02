@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { loginUser } from "../services/authApi";
+import { loginUser } from "../services/endpoints";
 import { FaSignInAlt, FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Login() {
@@ -24,13 +24,14 @@ function Login() {
       const { token, user: userData } = await loginUser({ email, password });
 
       if (token && userData) {
-        // AuthContext.login will now attach the token onto the user object
         login(userData, token);
         if (userData.role?.toLowerCase() === "admin") {
           navigate("/admin");
         } else {
           navigate("/");
         }
+      } else {
+        alert("Invalid response from server");
       }
     } catch (err) {
       console.log("BACKEND ERROR:", err.response?.data);

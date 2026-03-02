@@ -4,10 +4,8 @@ import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// 1. PLACE ORDER
 router.post("/cod", protect, async (req, res) => {
   try {
-    // support both older and newer address shapes
     const addr = req.body.address || {};
     const addressPayload = {
       name: addr.name || addr.fullName || "",
@@ -18,7 +16,6 @@ router.post("/cod", protect, async (req, res) => {
       fullAddress: addr.fullAddress || addr.street || "",
     };
 
-    // basic validation
     if (!req.body.build || !req.body.totalPrice) {
       console.error("Invalid order data", req.body);
       return res.status(400).json({ message: "Build and total price are required" });
@@ -37,16 +34,13 @@ router.post("/cod", protect, async (req, res) => {
     });
     res.status(201).json({ message: "Order placed!", order });
   } catch (error) {
-    // This console.log will tell you EXACTLY why the 500 error is happening
     console.error("Order Save Error:", error.message);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 });
 
-// 2. GET MY ORDERS
 router.get("/myorders", protect, async (req, res) => {
   try {
-    // We use req.userId which was attached by your protect middleware
     const orders = await Order.find({ userId: req.userId }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
@@ -67,7 +61,6 @@ router.get("/admin/all", protect, async (req, res) => {
   }
 });
 
-// 3. UPDATE ORDER STATUS (admin-only)
 router.put("/status/:id", protect, async (req, res) => {
   try {
     if (req.userRole !== "admin") {

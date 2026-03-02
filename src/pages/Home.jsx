@@ -1,72 +1,76 @@
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import UsageCard from "../components/UsageCard";
 import { useState } from "react";
 import { FaGamepad, FaBriefcase, FaUserGraduate, FaPlay } from "react-icons/fa";
 
-function Home() {
+export default function Home() {
   const [usage, setUsage] = useState(null);
   const navigate = useNavigate();
 
   const handleBuild = () => {
-    if (!usage) {
-      alert("Please select PC usage");
-      return;
-    }
+    if (!usage) return alert("Please select PC usage");
     navigate("/builder", { state: { usage } });
   };
 
   return (
-    <div className="hero">
-      <div className="hero-content">
-        <h1 className="hero-title">Welcome to BuildMyPC 💻</h1>
-        <p className="hero-subtitle">
-          Customize your custom pc easily by selecting compatible components
-          based on your budget and needs.
-        </p></div>
-        <div className="section">
-        <h3>Selected Usage: {usage || "Not selected"}</h3>
+    <div className="home">
 
-        <div className="usage-container">
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-overlay">
+          <h1>Build Your Dream PC 💻</h1>
+          <p>Select compatible components within your budget</p>
+          <button onClick={handleBuild} navigate="/builder" className="cta-btn">
+            <FaPlay /> Start Building
+          </button>
+        </div>
+      </section>
+
+      {/* USAGE */}
+      <section className="usage-section">
+        <h2>Select PC Usage</h2>
+        <p className="selected">
+          Selected: <b>{usage || "Not selected"}</b>
+        </p>
+
+        <div className="usage-grid">
           <UsageCard
-            title={<><FaGamepad style={{ marginRight: "8px" }} /> Gaming</>}
-            description="High performance PC for gaming"
+            title="Gaming"
+            icon={<FaGamepad />}
+            description="High performance gaming PC"
             selected={usage === "Gaming"}
             onClick={() => setUsage("Gaming")}
           />
 
           <UsageCard
-            title={<><FaBriefcase style={{ marginRight: "8px" }} /> Office</>}
-            description="Reliable PC for office & work"
+            title="Office"
+            icon={<FaBriefcase />}
+            description="Reliable office PC"
             selected={usage === "Office"}
             onClick={() => setUsage("Office")}
           />
 
           <UsageCard
-            title={<><FaUserGraduate style={{ marginRight: "8px" }} /> Student</>}
-            description="Affordable PC for study & learning"
+            title="Student"
+            icon={<FaUserGraduate />}
+            description="Affordable learning PC"
             selected={usage === "Student"}
             onClick={() => setUsage("Student")}
           />
         </div>
-        <button onClick={handleBuild} style={btnStyle}>
-          <FaPlay style={{ marginRight: "8px" }} /> Start Building
-        </button>
-        <Link></Link></div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="features">
+        <h2>Why BuildMyPC?</h2>
+        <div className="feature-grid">
+          <div>✔ Compatibility Check</div>
+          <div>✔ Budget Optimization</div>
+          <div>✔ Save & Share Builds</div>
+          <div>✔ Admin Component Control</div>
+        </div>
+      </section>
+
     </div>
   );
 }
-
-const btnStyle = {
-  padding: "12px 25px",
-  backgroundColor: "#0d6efd",
-  color: "#fff",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontSize: "16px",
-};
-
-export default Home;
-
-

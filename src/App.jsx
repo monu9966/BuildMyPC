@@ -15,11 +15,12 @@ import OrdersAdmin from "./components/admin/OrdersAdmin";
 import Checkout from "./pages/Checkout";
 import Cart from "./pages/Cart";
 import MyOrders from "./pages/MyOrders";
+import AdminComponentTypes from "./components/admin/AdminComponentTypes";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
     <div className="app-layout">
-      
       {/* USER WEBSITE */}
       <Routes>
         <Route
@@ -38,6 +39,15 @@ function App() {
                   <Route path="/summary" element={<Summary />} />
 
                   {/* Protected Routes */}
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+
                   <Route
                     path="/my-builds"
                     element={
@@ -84,6 +94,14 @@ function App() {
           element={
             <AdminRoute>
               <Admin />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/component-types"
+          element={
+            <AdminRoute>
+              <AdminComponentTypes />
             </AdminRoute>
           }
         />

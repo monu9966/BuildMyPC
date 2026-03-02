@@ -3,7 +3,6 @@ import Component from "../models/Component.js";
 import multer from "multer";
 import path from "path";
 
-// local img upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -18,18 +17,49 @@ const upload = multer({ storage });
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const { type } = req.query;
+  try {
+    const { type } = req.query;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const search = req.query.search || "";
+    const category = req.query.category || "";
 
-  let filter = {};
-  if (type) {
-    filter.type = type;
+    const query = {
+      name: { $regex: search, $options: "i" },
+    };
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (type) {
+      query.type = type;
+    }
+
+    const total = await Component.countDocuments(query);
+
+    const data = await Component.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.json({
+      data,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
-
-  const data = await Component.find(filter);
-  res.json(data);
 });
 
-// ADD component with image upload
 router.post("/", upload.single("image"), async (req, res) => {
   try {
     const { type, name, price, socket, ramType, watt } = req.body;
@@ -38,7 +68,6 @@ router.post("/", upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "All fields required" });
     }
 
-    // image path
     const image = req.file
       ? `http://localhost:5000/uploads/${req.file.filename}`
       : "";

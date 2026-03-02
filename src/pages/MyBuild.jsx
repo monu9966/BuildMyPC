@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getMyBuilds } from "../services/buildApi";
+import { getMyBuilds } from "../services/endpoints";
 import { FaSave, FaClock } from "react-icons/fa";
 
 function MyBuilds() {

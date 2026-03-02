@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getCart } from "../services/cartApi";
+import { getCart } from "../services/endpoints";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
