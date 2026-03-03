@@ -52,6 +52,14 @@ export function CartProvider({ children }) {
     );
   };
 
+  /* ========= UPDATE BUILD ========= */
+  // merge new data into an existing cart entry (components, price, etc.)
+  const updateCartItem = (id, changes) => {
+    setCart(prev =>
+      prev.map(item => (item.id === id ? { ...item, ...changes } : item))
+    );
+  };
+
   /* ========= CLEAR ========= */
   const clearCart = () => setCart([]);
 
@@ -66,6 +74,7 @@ export function CartProvider({ children }) {
         addToCart,
         removeFromCart,
         changeQty,
+        updateCartItem,
         clearCart,
       }}
     >

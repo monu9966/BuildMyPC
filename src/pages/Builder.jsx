@@ -1,9 +1,22 @@
 import { useState, useEffect } from "react";
 import SelectBox from "../components/SelectBox";
 import axios from "axios";
-import { FaCheck, FaTimes, FaClipboardList } from "react-icons/fa";
+import { API } from "../services/api";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+import {
+  FaCheck,
+  FaTimes,
+  FaClipboardList,
+  FaShoppingCart,
+  FaSave,
+  FaFilePdf,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useBuild } from "../context/BuildContext";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Builder() {
   const [types, setTypes] = useState([]);
@@ -13,7 +26,9 @@ export default function Builder() {
   const navigate = useNavigate();
   const { selectedParts: contextParts, setSelectedParts } = useBuild();
 
-  // when user returns to builder (e.g. from summary), prefill selections
+  const { cart, addToCart } = useCart();
+  const { user } = useAuth();
+
   useEffect(() => {
     if (contextParts) {
       const parts = contextParts.selectedParts || contextParts;
@@ -26,7 +41,6 @@ export default function Builder() {
     const load = async () => {
       const [typesRes, prodRes] = await Promise.all([
         axios.get("/api/component-types"),
-        // request all components by asking for a high limit (0 means no limit on server)
         axios.get("/api/components", { params: { limit: 0 } }),
       ]);
 
@@ -47,6 +61,73 @@ export default function Builder() {
     0,
   );
 
+  const buildData = {
+    id: JSON.stringify(selected),
+    components: selected,
+    totalPrice,
+  };
+
+  const alreadyInCart = cart.some((item) => item.id === buildData.id);
+  const hasSelected = Object.keys(selected).length > 0;
+
+  const handleSave = async () => {
+    if (!user) {
+      alert("Please login to save your build");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await API.post("/builds", {
+        userId: user._id,
+        components: selected,
+        totalPrice,
+      });
+      alert("Build saved!");
+    } catch {
+      alert("Save failed");
+    }
+  };
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text("BuildMyPC Summary", 14, 15);
+
+    autoTable(doc, {
+      startY: 25,
+      head: [["Component", "Name", "Price"]],
+      body: types.map((t) => [
+        t.name,
+        selected[t.name]?.name || "-",
+        selected[t.name]?.price || 0,
+      ]),
+    });
+
+    doc.text(`Total: ₹${totalPrice}`, 14, doc.lastAutoTable.finalY + 10);
+    doc.save("BuildMyPC.pdf");
+  };
+
+  const shareBuild = async () => {
+    if (!user) {
+      alert("Please login to share your build");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await API.post("/builds/share", {
+        components: selected,
+        totalPrice,
+      });
+
+      const link = `${window.location.origin}/build/${res.data.id}`;
+      await navigator.clipboard.writeText(link);
+      alert("Build link copied! 🔗");
+    } catch {
+      alert("Error sharing build");
+    }
+  };
+
   /* ===== Compatibility ===== */
   const cpu = selected.CPU;
   const mb = selected.Motherboard;
@@ -66,6 +147,7 @@ export default function Builder() {
 
         {types.map((type) => (
           <SelectBox
+            key={type._id || type.name}
             title={type.name}
             options={products.filter((p) => p.type === type.name)}
             selected={selected[type.name]}
@@ -83,29 +165,57 @@ export default function Builder() {
         <CompatRow label="RAM & Motherboard" ok={ramCompat} />
         <CompatRow label="GPU & PSU" ok={gpuPsuCompat} />
 
-        <h3>Selected Parts</h3>
-        {types.map((type) => {
-          const item = selected[type.name];
-          return (
-            <div key={type._id} className="summary-row">
-              {type.name}
-              <span>{item?.name || "Not selected"}</span>
-              <span>₹{item?.price || 0}</span>
-            </div>
-          );
-        })}
-
-        <h2>Total ₹{totalPrice}</h2>
-
+        <div className="selected-container">
+          <h3 className="selected-title">Selected Components</h3>a
+          {types.map((type) => {
+            const item = selected[type.name];
+            return (
+              <div key={type._id} className="selected-row">
+                <div className="selected-left">
+                  <span className="component-name">{type.name}</span>
+                  <span className="component-value">
+                    {item ? item.name : "Not selected"}
+                  </span>
+                </div>
+                <div className="selected-price">₹{item ? item.price : 0}</div>
+              </div>
+            );
+          })}
+        </div>
+        <h2 className="total-price">Total ₹{totalPrice}</h2>
         <button
-          className="summary-btn"
           onClick={() => {
-            // store just the selected parts object; total price is recalculated in summary
-            setSelectedParts(selected);
-            navigate("/summary");
+            if (alreadyInCart) {
+              navigate("/cart");
+            } else {
+              if (!hasSelected) return; // safety
+              addToCart(buildData);
+              navigate("/cart");
+            }
           }}
+          disabled={!hasSelected}
         >
-          <FaClipboardList /> View Summary
+          {alreadyInCart ? (
+            <>
+              <FaShoppingCart /> Go to Cart
+            </>
+          ) : (
+            <>
+              <FaShoppingCart /> Add to Cart
+            </>
+          )}
+        </button>
+
+        <button onClick={handleSave} disabled={!user}>
+          <FaSave /> Save Build
+        </button>
+
+        <button onClick={downloadPDF}>
+          <FaFilePdf /> Download PDF
+        </button>
+
+        <button onClick={shareBuild} disabled={!user}>
+          🔗 Share Build
         </button>
       </div>
     </div>

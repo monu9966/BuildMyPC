@@ -32,7 +32,7 @@ export const deleteBuild = (id) => API.delete(`/builds/${id}`);
 
 /* ORDERS */
 export const getOrders = () => API.get("/orders/admin/all");
-export const placeCODOrder = (data) => API.post("/orders", data);
+export const placeCODOrder = (data) => API.post("/orders/cod", data);
 
 /* CART */
 export const getCart = () => API.get("/cart");
