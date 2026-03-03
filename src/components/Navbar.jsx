@@ -4,6 +4,7 @@ import defaultAvatar from "../assets/default-avatar.png";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { API } from "../services/api";
+import { useCart } from "../context/CartContext";
 import {
   FaHome,
   FaTools,
@@ -22,8 +23,9 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const [dropOpen, setDropOpen] = useState(false);
-  const navRef = useRef(null); 
+  const navRef = useRef(null);
   const closeMenu = () => setMenuOpen(false);
+  const { cartCount } = useCart();
 
   const handleLogout = () => {
     logout();
@@ -31,20 +33,20 @@ export default function Navbar() {
     navigate("/login");
   };
 
-useEffect(() => {
-  function handleClickOutside(event) {
-    if (navRef.current && !navRef.current.contains(event.target)) {
-      setMenuOpen(false);
-      setDropOpen(false);   
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (navRef.current && !navRef.current.contains(event.target)) {
+        setMenuOpen(false);
+        setDropOpen(false);
+      }
     }
-  }
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   // helper to convert server-relative avatar path into full URL
   const avatarUrl = (path) => {
     if (!path) return "/default.png";
@@ -80,9 +82,16 @@ useEffect(() => {
           <>
             <NavItem
               to="/cart"
-              icon={<FaShoppingCart />}
-              text="My Cart"
               onClick={closeMenu}
+              icon={
+                <div className="cart-icon-wrapper">
+                  <FaShoppingCart />
+                  {cartCount > 0 && (
+                    <span className="cart-badge">{cartCount}</span>
+                  )}
+                </div>
+              }
+              text="My Cart"
             />
 
             {user.role === "admin" && (
@@ -155,15 +164,15 @@ useEffect(() => {
             )}
           </div>
         ) : (
-<div className="auth-buttons">
-  <Link to="/login" className="login-btn" onClick={closeMenu}>
-    <FaSignInAlt /> Login
-  </Link>
+          <div className="auth-buttons">
+            <Link to="/login" className="login-btn" onClick={closeMenu}>
+              <FaSignInAlt /> Login
+            </Link>
 
-  <Link to="/register" className="signup-btn" onClick={closeMenu}>
-    <FaUserPlus /> Sign Up
-  </Link>
-</div>
+            <Link to="/register" className="signup-btn" onClick={closeMenu}>
+              <FaUserPlus /> Sign Up
+            </Link>
+          </div>
         )}
       </div>
     </nav>

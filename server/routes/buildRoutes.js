@@ -4,50 +4,54 @@ import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
-
-// =============================
-// 🔐 AUTH MIDDLEWARE
-// =============================
+/* =============================
+🔐 AUTH MIDDLEWARE
+============================= */
 const protect = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
-      return res.status(401).json({ message: "No token provided" });
-    }
+    if (!authHeader) return res.status(401).json({ message: "No token" });
 
-    // Expect: Bearer TOKEN
     const token = authHeader.split(" ")[1];
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     req.userId = decoded.id;
     req.userRole = decoded.role;
 
     next();
-  } catch (err) {
+  } catch {
     res.status(401).json({ message: "Invalid token" });
   }
 };
 
+/* =============================
+💾 SAVE BUILD (PRIVATE)
+============================= */
+// helper to transform a flat map into the array schema expected by Build
+function normalizeComponents(input) {
+  // if already an array, assume it is correctly formatted
+  if (Array.isArray(input)) return input;
+  if (!input || typeof input !== "object") return [];
 
-// =============================
-// 💾 SAVE BUILD
-// =============================
+  return Object.entries(input).map(([typeName, item]) => ({
+    typeName,
+    componentId: item?._id || null,
+    name: item?.name || "",
+    price: item?.price || 0,
+    image: item?.image || "",
+  }));
+}
+
 router.post("/", protect, async (req, res) => {
   try {
     const { components, totalPrice } = req.body;
 
-    if (!components || !totalPrice) {
-      return res.status(400).json({
-        message: "Components and total price required",
-      });
-    }
-
     const build = await Build.create({
       userId: req.userId,
-      components,
+      components: normalizeComponents(components),
       totalPrice,
+      isPublic: false,
     });
 
     res.status(201).json(build);
@@ -56,69 +60,84 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-
-// =============================
-// 👤 GET MY BUILDS
-// =============================
-router.get("/my", protect, async (req, res) => {
+/* =============================
+🔗 SHARE BUILD (PUBLIC)
+============================= */
+router.post("/share", protect, async (req, res) => {
   try {
-    const builds = await Build.find({ userId: req.userId })
-      .sort({ createdAt: -1 });
+    const { components, totalPrice } = req.body;
 
-    res.json(builds);
+    const build = await Build.create({
+      userId: req.userId,
+      components: normalizeComponents(components),
+      totalPrice,
+      isPublic: true,
+    });
+
+    res.json({ id: build._id });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Error sharing build" });
   }
 });
 
-
-// =============================
-// 👑 GET ALL BUILDS (ADMIN)
-// =============================
-router.get("/admin/all", protect, async (req, res) => {
-  try {
-    if (req.userRole !== "admin") {
-      return res.status(403).json({ message: "Admins only" });
-    }
-
-    const builds = await Build.find()
-      .populate("userId", "name email")
-      .sort({ createdAt: -1 });
-
-    res.json(builds);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-
-// =============================
-// ❌ DELETE BUILD
-// =============================
-router.delete("/:id", protect, async (req, res) => {
+/* =============================
+🌐 VIEW SHARED BUILD
+============================= */
+router.get("/public/:id", async (req, res) => {
   try {
     const build = await Build.findById(req.params.id);
 
-    if (!build) {
+    if (!build || !build.isPublic)
       return res.status(404).json({ message: "Build not found" });
-    }
 
-    // Allow owner or admin
-    if (
-      build.userId.toString() !== req.userId &&
-      req.userRole !== "admin"
-    ) {
-      return res.status(403).json({ message: "Not allowed" });
-    }
-
-    await build.deleteOne();
-
-    res.json({ message: "Build deleted" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.json(build);
+  } catch {
+    res.status(404).json({ message: "Build not found" });
   }
 });
 
+/* =============================
+👤 GET MY BUILDS
+============================= */
+router.get("/my", protect, async (req, res) => {
+  const builds = await Build.find({ userId: req.userId })
+    .sort({ createdAt: -1 });
 
-// =============================
+  res.json(builds);
+});
+
+/* =============================
+👑 ADMIN GET ALL BUILDS
+============================= */
+router.get("/admin/all", protect, async (req, res) => {
+  if (req.userRole !== "admin")
+    return res.status(403).json({ message: "Admins only" });
+
+  const builds = await Build.find()
+    .populate("userId", "name email")
+    .sort({ createdAt: -1 });
+
+  res.json(builds);
+});
+
+/* =============================
+❌ DELETE BUILD
+============================= */
+router.delete("/:id", protect, async (req, res) => {
+  const build = await Build.findById(req.params.id);
+
+  if (!build) return res.status(404).json({ message: "Not found" });
+
+  if (
+    build.userId.toString() !== req.userId &&
+    req.userRole !== "admin"
+  ) {
+    return res.status(403).json({ message: "Not allowed" });
+  }
+
+  await build.deleteOne();
+  res.json({ message: "Deleted" });
+});
+
 export default router;

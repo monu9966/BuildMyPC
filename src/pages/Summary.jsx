@@ -1,204 +1,166 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { saveBuild } from "../services/endpoints";
+import axios from "axios";
+import { API } from "../services/api";
 import { useCart } from "../context/CartContext";
-import { saveCart } from "../services/endpoints";
 import { useAuth } from "../context/AuthContext";
 import { useBuild } from "../context/BuildContext";
 import { FaShoppingCart, FaEdit, FaSave, FaFilePdf } from "react-icons/fa";
-import axios from "axios";
 
-function Summary() {
-  const { addToCart } = useCart();
+export default function Summary() {
+  const navigate = useNavigate();
   const { user } = useAuth();
-
   const { selectedParts } = useBuild();
   const [types, setTypes] = useState([]);
+  const { cart, addToCart } = useCart();
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  // handle cases where context stored an object with { selectedParts, totalPrice }
+  const parts =
+    selectedParts && selectedParts.selectedParts
+      ? selectedParts.selectedParts
+      : selectedParts || {};
 
-  const build = location.state;
-
+  /* ===== Load component types ===== */
   useEffect(() => {
     axios
       .get("/api/component-types")
-      .then((res) => setTypes(res.data))
-      .catch((err) => console.log(err));
+      .then((res) => setTypes(res.data || []))
+      .catch(() => alert("Error loading types"));
   }, []);
 
-  const total = Object.values(selectedParts).reduce(
+  /* ===== Total Price ===== */
+  const totalPrice = Object.values(parts).reduce(
     (sum, item) => sum + (item?.price || 0),
     0,
   );
 
-  if (!build) {
-    return (
-      <div className="container">
-        <div className="card">
-          <h2>No Build Found</h2>
-          <button onClick={() => navigate("/builder")}>Go to PC Builder</button>
-        </div>
-      </div>
-    );
-  }
-
-  const {
-    cpu,
-    motherboard,
-    ram,
-    storage,
-    gpu,
-    psu,
-    cabinet,
-    monitor,
-    totalPrice,
-  } = build;
-
   const buildData = {
-    cpu,
-    motherboard,
-    ram,
-    storage,
-    gpu,
-    psu,
-    cabinet,
-    monitor,
+    id: JSON.stringify(selectedParts),
+    components: selectedParts,
     totalPrice,
-    components: [cpu, motherboard, ram, storage, gpu, psu, cabinet, monitor],
   };
 
-  // pdf download code
+  const alreadyInCart = cart.some((item) => item.id === buildData.id);
+
+  /* ===== Save Build ===== */
+  const handleSave = async () => {
+    if (!user) {
+      alert("Please login to save your build");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await API.post("/builds", {
+        userId: user._id,
+        components: parts,
+        totalPrice,
+      });
+      alert("Build saved!");
+    } catch {
+      alert("Save failed");
+    }
+  };
+
+  /* ===== PDF ===== */
   const downloadPDF = () => {
     const doc = new jsPDF();
-
-    doc.text("BuildMyPC - Configuration Summary", 14, 15);
+    doc.text("BuildMyPC Summary", 14, 15);
 
     autoTable(doc, {
       startY: 25,
-      head: [["Component", "Name", "Price (₹)"]],
-      body: [
-        ["CPU", cpu?.name || "-", cpu?.price || 0],
-        ["Motherboard", motherboard?.name || "-", motherboard?.price || 0],
-        ["RAM", ram?.name || "-", ram?.price || 0],
-        ["Storage", storage?.name || "-", storage?.price || 0],
-        ["GPU", gpu?.name || "-", gpu?.price || 0],
-        ["PSU", psu?.name || "-", psu?.price || 0],
-        ["Cabinet", cabinet?.name || "-", cabinet?.price || 0],
-        ["Monitor", monitor?.name || "-", monitor?.price || 0],
-        ["TOTAL PRICE", "", totalPrice],
-      ],
+      head: [["Component", "Name", "Price"]],
+      body: types.map((t) => [
+        t.name,
+        parts[t.name]?.name || "-",
+        parts[t.name]?.price || 0,
+      ]),
     });
-    doc.save("BuildMyPC-Summary.pdf");
+
+    doc.text(`Total: ₹${totalPrice}`, 14, doc.lastAutoTable.finalY + 10);
+    doc.save("BuildMyPC.pdf");
   };
 
-  const handleSave = async () => {
-    await saveBuild({
-      components: {
-        cpu,
-        motherboard,
-        ram,
-        storage,
-        gpu,
-        psu,
-        cabinet,
-        monitor,
-      },
-      totalPrice,
-    });
-    alert("Build saved successfully!");
-  };
+  const shareBuild = async () => {
+    if (!user) {
+      alert("Please login to share your build");
+      navigate("/login");
+      return;
+    }
 
-  const handleSaveCart = async () => {
-    await saveCart({
-      userId: user._id,
-      build: {
-        cpu,
-        motherboard,
-        ram,
-        storage,
-        gpu,
-        psu,
-        cabinet,
-        monitor,
+    try {
+      // make sure we send the normalized parts map, not the wrapped object
+      const res = await API.post("/builds/share", {
+        components: parts,
         totalPrice,
-      },
-    });
+      });
 
-    alert("Add to cart SucceFul!");
+      const link = `${window.location.origin}/build/${res.data.id}`;
+
+      await navigator.clipboard.writeText(link);
+      alert("Build link copied! 🔗");
+    } catch {
+      alert("Error sharing build");
+    }
   };
 
   return (
-    <div className="container">
-      <div className="card">
-        <h2>PC Build Summary</h2>
+    <div className="summary-page">
+      <h2>🖥️ PC Build Summary</h2>
 
-        <div className="price-box">
-          <h2>Selected Components</h2>
-
+      <div className="summary-grid">
+        {/* LEFT SIDE */}
+        <div className="summary-left">
           {types.map((type) => {
-            const item = selectedParts[type.name];
-
+            const item = parts[type.name];
             return (
-              <div key={type._id} className="summary-row">
-                <b>{type.name}</b> :{item ? item.name : "Not selected"}
-                <span> ₹{item ? item.price : 0}</span>
+              <div key={type._id} className="summary-card">
+                <img
+                  src={item?.image || "/default-avatar.png"}
+                  alt={item?.name}
+                />
+                <div>
+                  <b>{type.name}</b>
+                  <p>{item?.name || "Not Selected"}</p>
+                </div>
+                <span>₹{item?.price || 0}</span>
               </div>
             );
           })}
-
-          <h3>Total Price: ₹{total}</h3>
         </div>
 
+        {/* RIGHT SIDE */}
+        <div className="summary-right">
+          <h3>Total Price</h3>
+          <h1>₹{totalPrice}</h1>
 
-        <hr />
+          <button
+            onClick={() =>
+              alreadyInCart ? navigate("/cart") : addToCart(buildData)
+            }
+          >
+            {alreadyInCart ? "Go to Cart 🛒" : "Add to Cart"}
+          </button>
 
-        <div className="price-row total-row">
-          <span>Total Price:</span>
-          <span>₹{totalPrice}</span>
+          <button onClick={() => navigate("/builder")}>
+            <FaEdit /> Edit Build
+          </button>
+
+          <button onClick={handleSave} disabled={!user}>
+            <FaSave /> Save Build
+          </button>
+
+          <button onClick={downloadPDF}>
+            <FaFilePdf /> Download PDF
+          </button>
+
+          <button onClick={shareBuild} disabled={!user}>
+            🔗 Share Build
+          </button>
         </div>
-
-        <button
-          onClick={() => {
-            addToCart(buildData);
-            handleSaveCart();
-          }}
-        >
-          <FaShoppingCart style={{ marginRight: "8px" }} /> Add to Cart
-        </button>
-
-        <button
-          className="buy btn"
-          onClick={() => navigate("/Cart", { state: buildData })}
-        >
-          <FaShoppingCart style={{ marginRight: "8px" }} /> Buy Now
-        </button>
-
-        <br />
-        <button onClick={() => navigate("/builder")} style={btnStyle}>
-          <FaEdit style={{ marginRight: "8px" }} /> Edit Build
-        </button>
-
-        <button onClick={handleSave} className="summary-btn">
-          <FaSave style={{ marginRight: "8px" }} /> Save Build
-        </button>
-
-        <button onClick={downloadPDF} className="summary-btn">
-          <FaFilePdf style={{ marginRight: "8px" }} /> Download PDF
-        </button>
       </div>
     </div>
   );
 }
-
-const btnStyle = {
-  padding: "10px 20px",
-  backgroundColor: "#0d6efd",
-  color: "#fff",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-};
-export default Summary;

@@ -17,6 +17,7 @@ import Cart from "./pages/Cart";
 import MyOrders from "./pages/MyOrders";
 import AdminComponentTypes from "./components/admin/AdminComponentTypes";
 import Profile from "./pages/Profile";
+import ViewBuild from "./pages/ViewBuild";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/builder" element={<Builder />} />
                   <Route path="/summary" element={<Summary />} />
+                  <Route path="/build/:id" element={<ViewBuild />} />
 
                   {/* Protected Routes */}
                   <Route

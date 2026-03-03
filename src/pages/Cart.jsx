@@ -1,25 +1,20 @@
-import { useEffect, useState } from "react";
-import { getCart } from "../services/endpoints";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaTrash, FaShoppingCart, FaCheck } from "react-icons/fa";
+import { FaTrash, FaShoppingCart, FaCheck, FaPlus, FaMinus } from "react-icons/fa";
 
 export default function Cart() {
-  const { cart, removeFromCart, clearCart } = useCart();
+  const { cart, removeFromCart, clearCart, changeQty } = useCart();
   const { user } = useAuth();
-  const [builds, setBuilds] = useState([]);
   const navigate = useNavigate();
 
   if (!user) return <h2>Please login first</h2>;
 
-  const total = cart.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-
-  useEffect(() => {
-    getCart(user._id).then((res) => {
-      setBuilds(res.data?.items || []);
-    });
-  }, []);
+  // compute cost considering quantity
+  const total = cart.reduce(
+    (sum, b) => sum + (b.totalPrice || 0) * (b.qty || 1),
+    0,
+  );
 
   return (
     <div className="container">
@@ -29,12 +24,18 @@ export default function Cart() {
       {cart.length === 0 && <p>No items in cart</p>}
 
       {cart.map((item, i) => (
-        <div className="cart-card" key={i}>
+        <div className="cart-card" key={item.id || i}>
           <h4>PC Build {i + 1}</h4>
-          <p>Total: ₹{item.totalPrice}</p>
+          <p>Price: ₹{item.totalPrice}</p>
+
+          <div className="qty-controls">
+            <button onClick={() => changeQty(item.id, "dec")}> <FaMinus /> </button>
+            <span>{item.qty || 1}</span>
+            <button onClick={() => changeQty(item.id, "inc")}> <FaPlus /> </button>
+          </div>
 
           <button
-            onClick={() => removeFromCart(i)}
+            onClick={() => removeFromCart(item.id)}
             style={{ backgroundColor: "#e74c3c" }}
           >
             <FaTrash style={{ marginRight: "8px" }} /> Remove

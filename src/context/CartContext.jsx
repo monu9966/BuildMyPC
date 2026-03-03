@@ -3,38 +3,72 @@ import { createContext, useContext, useState, useEffect } from "react";
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  // initialize from localStorage so state survives page reloads
   const [cart, setCart] = useState(() => {
     try {
       const stored = localStorage.getItem("cart");
       return stored ? JSON.parse(stored) : [];
-    } catch (err) {
-      console.error("Failed to parse cart from localStorage:", err);
+    } catch {
       return [];
     }
   });
 
-  // keep localStorage in sync whenever cart changes
+  /* ========= SAVE TO LOCAL STORAGE ========= */
   useEffect(() => {
-    try {
-      localStorage.setItem("cart", JSON.stringify(cart));
-    } catch (err) {
-      console.error("Failed to save cart to localStorage:", err);
-    }
+    localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
+  /* ========= ADD TO CART ========= */
   const addToCart = (build) => {
-    setCart((prev) => [...prev, build]);
+    setCart(prev => {
+      // assign a unique identifier if the incoming build doesn't have one
+      const id = build.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+      // prevent duplicate builds by id
+      const exists = prev.find(item => item.id === id);
+      if (exists) return prev;
+
+      return [...prev, { ...build, id, qty: 1 }];
+    });
   };
 
-  const removeFromCart = (index) => {
-    setCart((prev) => prev.filter((_, i) => i !== index));
+  /* ========= REMOVE ========= */
+  const removeFromCart = (id) => {
+    setCart(prev => prev.filter(item => item.id !== id));
   };
 
+  /* ========= CHANGE QTY ========= */
+  const changeQty = (id, type) => {
+    setCart(prev =>
+      prev.map(item =>
+        item.id === id
+          ? {
+              ...item,
+              qty: type === "inc"
+                ? item.qty + 1
+                : Math.max(1, item.qty - 1)
+            }
+          : item
+      )
+    );
+  };
+
+  /* ========= CLEAR ========= */
   const clearCart = () => setCart([]);
 
+  /* ========= TOTAL ITEMS ========= */
+  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        cartCount,
+        addToCart,
+        removeFromCart,
+        changeQty,
+        clearCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

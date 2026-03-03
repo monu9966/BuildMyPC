@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import defaultImg from "../assets/default-avatar.png";
 
 export default function SelectBox({
@@ -9,7 +9,7 @@ export default function SelectBox({
   setOpenBox,
   selected,
 }) {
-  const [search, setSearch] = useMemo(() => [ "", () => {} ], []);
+  const [search, setSearch] = useState("");
 
   /* ===== Filter ===== */
   const filteredOptions = useMemo(() => {

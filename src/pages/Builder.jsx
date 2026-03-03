@@ -3,6 +3,7 @@ import SelectBox from "../components/SelectBox";
 import axios from "axios";
 import { FaCheck, FaTimes, FaClipboardList } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useBuild } from "../context/BuildContext";
 
 export default function Builder() {
   const [types, setTypes] = useState([]);
@@ -10,13 +11,23 @@ export default function Builder() {
   const [selected, setSelected] = useState({});
   const [openBox, setOpenBox] = useState(null);
   const navigate = useNavigate();
+  const { selectedParts: contextParts, setSelectedParts } = useBuild();
+
+  // when user returns to builder (e.g. from summary), prefill selections
+  useEffect(() => {
+    if (contextParts) {
+      const parts = contextParts.selectedParts || contextParts;
+      setSelected(parts);
+    }
+  }, [contextParts]);
 
   /* ===== Fetch data ===== */
   useEffect(() => {
     const load = async () => {
       const [typesRes, prodRes] = await Promise.all([
         axios.get("/api/component-types"),
-        axios.get("/api/components"),
+        // request all components by asking for a high limit (0 means no limit on server)
+        axios.get("/api/components", { params: { limit: 0 } }),
       ]);
 
       setTypes(typesRes.data || []);
@@ -88,9 +99,11 @@ export default function Builder() {
 
         <button
           className="summary-btn"
-          onClick={() =>
-            navigate("/summary", { state: { selected, totalPrice } })
-          }
+          onClick={() => {
+            // store just the selected parts object; total price is recalculated in summary
+            setSelectedParts(selected);
+            navigate("/summary");
+          }}
         >
           <FaClipboardList /> View Summary
         </button>

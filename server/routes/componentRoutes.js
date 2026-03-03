@@ -20,7 +20,9 @@ router.get("/", async (req, res) => {
   try {
     const { type } = req.query;
     const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 5;
+    // allow limit=0 to mean no limit (return everything)
+    const rawLimit = req.query.limit !== undefined ? Number(req.query.limit) : 5;
+    const limit = rawLimit;
     const search = req.query.search || "";
     const category = req.query.category || "";
 
@@ -45,16 +47,20 @@ router.get("/", async (req, res) => {
 
     const total = await Component.countDocuments(query);
 
-    const data = await Component.find(query)
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .sort({ createdAt: -1 });
+    let dataQuery = Component.find(query).sort({ createdAt: -1 });
+    if (limit && limit > 0) {
+      dataQuery = dataQuery.skip((page - 1) * limit).limit(limit);
+    }
 
-    res.json({
-      data,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-    });
+    const data = await dataQuery;
+
+    const response = { data };
+    if (limit && limit > 0) {
+      response.totalPages = Math.ceil(total / limit);
+      response.currentPage = page;
+    }
+
+    res.json(response);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }

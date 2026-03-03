@@ -2,12 +2,34 @@ import mongoose from "mongoose";
 
 const buildSchema = new mongoose.Schema(
   {
+    /* OWNER */
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
+    /* BUILD INFO */
+    title: {
+      type: String,
+      default: "My Custom PC Build",
+    },
+
+    description: String,
+
+    /* SHARE BUILD */
+    isPublic: {
+      type: Boolean,
+      default: false,
+    },
+
+    shareId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    /* COMPONENTS */
     components: [
       {
         typeId: {
@@ -15,7 +37,8 @@ const buildSchema = new mongoose.Schema(
           ref: "ComponentType",
         },
 
-        typeName: String,   // CPU / Mouse / Keyboard etc
+        typeName: String,
+
         componentId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Component",
@@ -27,7 +50,20 @@ const buildSchema = new mongoose.Schema(
       }
     ],
 
-    totalPrice: Number,
+    /* PRICE */
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+
+    /* EXTRA FEATURES */
+    compatibilityStatus: {
+      cpuMotherboard: Boolean,
+      ramMotherboard: Boolean,
+      gpuPsu: Boolean,
+    },
+
+    notes: String,
   },
   { timestamps: true }
 );
