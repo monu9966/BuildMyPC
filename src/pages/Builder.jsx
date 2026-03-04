@@ -166,7 +166,7 @@ export default function Builder() {
         <CompatRow label="GPU & PSU" ok={gpuPsuCompat} />
 
         <div className="selected-container">
-          <h3 className="selected-title">Selected Components</h3>a
+          <h3 className="selected-title">Selected Components</h3>
           {types.map((type) => {
             const item = selected[type.name];
             return (

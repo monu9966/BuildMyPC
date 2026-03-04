@@ -1,11 +1,17 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "./AuthContext"; // to scope cart per logged-in user
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  const { user } = useAuth();
+
+  // key used for persisting cart in localStorage; includes user identifier when available
+  const storageKey = user ? `cart_${user._id || user.email}` : "cart_guest";
+
   const [cart, setCart] = useState(() => {
     try {
-      const stored = localStorage.getItem("cart");
+      const stored = localStorage.getItem(storageKey);
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
@@ -14,8 +20,18 @@ export function CartProvider({ children }) {
 
   /* ========= SAVE TO LOCAL STORAGE ========= */
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem(storageKey, JSON.stringify(cart));
+  }, [cart, storageKey]);
+
+  // when the user (or corresponding storage key) changes we reload the cart
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      setCart(stored ? JSON.parse(stored) : []);
+    } catch {
+      setCart([]);
+    }
+  }, [storageKey]);
 
   /* ========= ADD TO CART ========= */
   const addToCart = (build) => {
@@ -62,6 +78,8 @@ export function CartProvider({ children }) {
 
   /* ========= CLEAR ========= */
   const clearCart = () => setCart([]);
+
+  // if user logs out or changes, we might also clear guest or previous user cart if desired
 
   /* ========= TOTAL ITEMS ========= */
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);

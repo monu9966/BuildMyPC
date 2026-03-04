@@ -8,13 +8,15 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useBuild } from "../context/BuildContext";
 import { FaShoppingCart, FaCreditCard, FaTrash } from "react-icons/fa";
+import { getDeliveryRange } from "../utils/deliveryDate";
 
 export default function Cart() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { selectedParts } = useBuild();
   const [types, setTypes] = useState([]);
-  const { cart, addToCart, qty, clearCart, updateCartItem, removeFromCart } = useCart();
+  const { cart, addToCart, qty, clearCart, updateCartItem, removeFromCart } =
+    useCart();
   // removed unused state for cart removal animation
   const [removingId, setRemovingId] = useState(null);
   // useBuild provides setSelectedParts, rename for clarity
@@ -25,8 +27,8 @@ export default function Cart() {
   const parts = cartBuild
     ? cartBuild.components || {}
     : selectedParts && selectedParts.selectedParts
-    ? selectedParts.selectedParts
-    : selectedParts || {};
+      ? selectedParts.selectedParts
+      : selectedParts || {};
 
   useEffect(() => {
     axios
@@ -70,7 +72,10 @@ export default function Cart() {
         (s, itm) => s + (itm?.price || 0) * (itm?.qty || 1),
         0,
       );
-      updateCartItem(cartBuild.id, { components: updatedParts, totalPrice: newTotal });
+      updateCartItem(cartBuild.id, {
+        components: updatedParts,
+        totalPrice: newTotal,
+      });
     }
   };
 
@@ -91,7 +96,10 @@ export default function Cart() {
           // no components left, remove the build entirely from cart
           removeFromCart(cartBuild.id);
         } else {
-          updateCartItem(cartBuild.id, { components: updated, totalPrice: newTotal });
+          updateCartItem(cartBuild.id, {
+            components: updated,
+            totalPrice: newTotal,
+          });
         }
       }
       setRemovingId(null);
@@ -159,6 +167,13 @@ export default function Cart() {
         <div className="cart-right">
           <h3>Total Price</h3>
           <h1>₹{totalPrice}</h1>
+          <div className="delivery-box">
+            <span className="delivery-icon">🚚</span>
+            <div>
+              <p className="delivery-title">Estimated Delivery</p>
+              <p className="delivery-date">{getDeliveryRange()}</p>
+            </div>
+          </div>
           <button onClick={() => navigate("/checkout")}>
             <FaCreditCard /> Checkout
           </button>

@@ -13,6 +13,7 @@ import AdminRoute from "./components/AdminRoute";
 import Admin from "./pages/Admin";
 import OrdersAdmin from "./components/admin/OrdersAdmin";
 import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
 import Cart from "./pages/Cart";
 import MyOrders from "./pages/MyOrders";
 import AdminComponentTypes from "./components/admin/AdminComponentTypes";
@@ -39,6 +40,7 @@ function App() {
                   <Route path="/builder" element={<Builder />} />
                   <Route path="/summary" element={<Summary />} />
                   <Route path="/build/:id" element={<ViewBuild />} />
+                  <Route path="/order-success" element={<OrderSuccess />} />
 
                   {/* Protected Routes */}
                   <Route

@@ -29,6 +29,7 @@ router.post("/cod", protect, async (req, res) => {
       userId: req.userId, // This comes from the decoded token in your middleware
       build: req.body.build,
       totalPrice: req.body.totalPrice,
+      estimatedDelivery: req.body.estimatedDelivery || "Not specified",
       address: addressPayload,
       paymentMethod: "COD",
     });
@@ -68,7 +69,7 @@ router.put("/status/:id", protect, async (req, res) => {
     }
 
     const { status } = req.body;
-    const allowed = ["Pending", "Processing", "Shipped", "Cancelled"];
+    const allowed = ["Pending", "Processing", "Shipped", "Cancelled", "Out for Delivery", "Delivered"];
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
