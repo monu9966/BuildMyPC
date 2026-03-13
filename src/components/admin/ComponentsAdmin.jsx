@@ -42,6 +42,7 @@ export default function ComponentsAdmin({ refresh }) {
     ramType: "",
     watt: "",
     image: null,
+    isBestSeller: false,
   });
 
   const [editingId, setEditingId] = useState(null);
@@ -89,6 +90,7 @@ export default function ComponentsAdmin({ refresh }) {
         ramType: "",
         watt: "",
         image: null,
+        isBestSeller: false,
       });
 
       if (fileRef.current) fileRef.current.value = "";
@@ -187,6 +189,15 @@ export default function ComponentsAdmin({ refresh }) {
           onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
         />
 
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={form.isBestSeller}
+            onChange={(e) => setForm({ ...form, isBestSeller: e.target.checked })}
+          />
+          Best Seller
+        </label>
+
         <button className="btn-primary" onClick={handleSubmit}>
           {editingId ? "➕ Update" : "➕ Add"}
         </button>
@@ -232,6 +243,7 @@ export default function ComponentsAdmin({ refresh }) {
                       ramType: c.ramType || "",
                       watt: c.watt || "",
                       image: null,
+                      isBestSeller: c.isBestSeller || false,
                     });
                     setEditingId(c._id);
                   }}

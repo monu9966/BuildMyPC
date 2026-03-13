@@ -34,16 +34,37 @@ export function CartProvider({ children }) {
   }, [storageKey]);
 
   /* ========= ADD TO CART ========= */
-  const addToCart = (build) => {
+  const addToCart = (item) => {
     setCart(prev => {
+      // If adding a single product component (has a 'type' property)
+      if (item.type) {
+        const existing = prev.find(i => i.productId === item._id && i.type === item.type);
+        if (existing) {
+          return prev.map(i => 
+            (i.productId === item._id && i.type === item.type) 
+            ? { ...i, qty: i.qty + 1 } 
+            : i
+          );
+        }
+        return [...prev, { 
+          id: `prod-${item._id}-${Date.now()}`, 
+          productId: item._id, 
+          name: item.name, 
+          price: item.price, 
+          type: item.type,
+          image: item.image,
+          qty: 1 
+        }];
+      }
+
       // assign a unique identifier if the incoming build doesn't have one
-      const id = build.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const id = item.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
       // prevent duplicate builds by id
-      const exists = prev.find(item => item.id === id);
+      const exists = prev.find(i => i.id === id);
       if (exists) return prev;
 
-      return [...prev, { ...build, id, qty: 1 }];
+      return [...prev, { ...item, id, qty: 1 }];
     });
   };
 

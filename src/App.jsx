@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Footer from "./components/footer";
+import Footer from "./components/Footer";
 
 import Home from "./pages/Home";
 import Builder from "./pages/Builder";
@@ -19,6 +19,9 @@ import MyOrders from "./pages/MyOrders";
 import AdminComponentTypes from "./components/admin/AdminComponentTypes";
 import Profile from "./pages/Profile";
 import ViewBuild from "./pages/ViewBuild";
+import ProductDetails from "./pages/ProductDetails";
+import Wishlist from "./pages/Wishlist";
+import Compare from "./pages/Compare";
 
 function App() {
   return (
@@ -41,6 +44,9 @@ function App() {
                   <Route path="/summary" element={<Summary />} />
                   <Route path="/build/:id" element={<ViewBuild />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
+                  <Route path="/product/:id" element={<ProductDetails />} />
+                  <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/compare" element={<Compare />} />
 
                   {/* Protected Routes */}
                   <Route

@@ -18,12 +18,10 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, ".env") });
 console.log("JWT Secret Check:", process.env.JWT_SECRET);
 connectDB();
-
 const app = express();
 
 app.use(express.json());
 app.use(cors());
-
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/builds", buildRoutes);

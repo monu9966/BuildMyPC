@@ -65,10 +65,12 @@ export default function Checkout() {
 
   // always use current cart contents; skip location state entirely
   const currentCart = Array.isArray(cart) ? cart : [];
-  const totalPrice = currentCart.reduce(
-    (sum, b) => sum + (b.totalPrice || 0),
-    0,
-  );
+  const totalPrice = currentCart.reduce((sum, item) => {
+    if (item.components) {
+      return sum + (item.totalPrice || 0);
+    }
+    return sum + (item.price || 0) * (item.qty || 1);
+  }, 0);
 
   // fixed delivery charge (could be dynamic later)
   const deliveryFee = 100;
@@ -344,12 +346,20 @@ export default function Checkout() {
           </div>
           {currentCart.length === 0 && <p>No items in cart.</p>}
 
-          {currentCart.map((b, i) => (
-            <div key={i} className="summary-item">
-              <span>PC Build {i + 1}</span>
-              <span>₹{b.totalPrice}</span>
-            </div>
-          ))}
+          {currentCart.map((item, i) => {
+            const isBuild = !!item.components;
+            return (
+              <div key={i} className="summary-item">
+                <span>
+                  {isBuild ? `PC Build ${i + 1}` : item.name}
+                  {!isBuild && item.qty > 1 && ` (x${item.qty})`}
+                </span>
+                <span>
+                  ₹{isBuild ? item.totalPrice : (item.price || 0) * (item.qty || 1)}
+                </span>
+              </div>
+            );
+          })}
 
           <div className="summary-item">
             <span>Delivery Fee</span>

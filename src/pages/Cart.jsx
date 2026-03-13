@@ -15,7 +15,7 @@ export default function Cart() {
   const { user } = useAuth();
   const { selectedParts } = useBuild();
   const [types, setTypes] = useState([]);
-  const { cart, addToCart, qty, clearCart, updateCartItem, removeFromCart } =
+  const { cart, addToCart, changeQty, clearCart, updateCartItem, removeFromCart } =
     useCart();
   // removed unused state for cart removal animation
   const [removingId, setRemovingId] = useState(null);
@@ -38,69 +38,63 @@ export default function Cart() {
   }, []);
 
   /* ===== Total Price ===== */
-  // always recalc from the current parts object so removals/qty changes reflect immediately
-  const totalPrice = Object.values(parts).reduce(
-    (sum, item) => sum + (item?.price || 0) * (item?.qty || 1),
-    0,
-  );
-
-  // buildData/alreadyInCart are only used on builder page; keep minimal here in case we need them later
-  const buildData = {
-    id: cartBuild ? cartBuild.id : JSON.stringify(selectedParts),
-    components: cartBuild ? cartBuild.components : selectedParts,
-    totalPrice,
-  };
-
-  const alreadyInCart = cart.some((item) => item.id === buildData.id);
-
-  const changeQty = (typeName, action) => {
-    const updatedParts = { ...parts };
-
-    if (!updatedParts[typeName]) return;
-
-    const currentQty = updatedParts[typeName].qty || 1;
-
-    updatedParts[typeName].qty =
-      action === "inc" ? currentQty + 1 : Math.max(1, currentQty - 1);
-
-    // update build context (selectedParts)
-    setBuild(updatedParts);
-
-    // also sync to cart item if we're showing a cart build
-    if (cartBuild) {
-      const newTotal = Object.values(updatedParts).reduce(
-        (s, itm) => s + (itm?.price || 0) * (itm?.qty || 1),
-        0,
-      );
-      updateCartItem(cartBuild.id, {
-        components: updatedParts,
-        totalPrice: newTotal,
-      });
+  const cartTotal = cart.reduce((sum, item) => {
+    if (item.components) {
+      return sum + (item.totalPrice || 0);
     }
+    return sum + (item.price || 0) * (item.qty || 1);
+  }, 0);
+
+  const handleRemoveSingle = (id) => {
+    setRemovingId(id);
+    setTimeout(() => {
+      removeFromCart(id);
+      setRemovingId(null);
+    }, 300);
   };
 
-  // remove a single component from the current build
-  const handleRemove = (typeName) => {
-    setRemovingId(typeName);
+  const changeBuildQty = (cartItemId, typeName, action) => {
+    const cartItem = cart.find(c => c.id === cartItemId);
+    if (!cartItem || !cartItem.components) return;
 
+    const updatedComponents = { ...cartItem.components };
+    const currentItem = updatedComponents[typeName];
+    if (!currentItem) return;
+
+    const currentQty = currentItem.qty || 1;
+    currentItem.qty = action === "inc" ? currentQty + 1 : Math.max(1, currentQty - 1);
+
+    const newTotalPrice = Object.values(updatedComponents).reduce(
+      (sum, c) => sum + (c?.price || 0) * (c?.qty || 1),
+      0
+    );
+
+    updateCartItem(cartItemId, {
+      components: updatedComponents,
+      totalPrice: newTotalPrice
+    });
+  };
+
+  const handleRemoveBuildItem = (cartItemId, typeName) => {
+    setRemovingId(`${cartItemId}-${typeName}`);
     setTimeout(() => {
-      const updated = { ...parts };
-      delete updated[typeName];
-      setBuild(updated);
-      if (cartBuild) {
-        const newTotal = Object.values(updated).reduce(
-          (s, itm) => s + (itm?.price || 0) * (itm?.qty || 1),
-          0,
+      const cartItem = cart.find(c => c.id === cartItemId);
+      if (!cartItem || !cartItem.components) return;
+
+      const updatedComponents = { ...cartItem.components };
+      delete updatedComponents[typeName];
+
+      if (Object.keys(updatedComponents).length === 0) {
+        removeFromCart(cartItemId);
+      } else {
+        const newTotalPrice = Object.values(updatedComponents).reduce(
+          (sum, c) => sum + (c?.price || 0) * (c?.qty || 1),
+          0
         );
-        if (Object.keys(updated).length === 0) {
-          // no components left, remove the build entirely from cart
-          removeFromCart(cartBuild.id);
-        } else {
-          updateCartItem(cartBuild.id, {
-            components: updated,
-            totalPrice: newTotal,
-          });
-        }
+        updateCartItem(cartItemId, {
+          components: updatedComponents,
+          totalPrice: newTotalPrice
+        });
       }
       setRemovingId(null);
     }, 300);
@@ -115,58 +109,85 @@ export default function Cart() {
       <div className="cart-grid">
         {/* LEFT SIDE */}
         <div className="cart-left">
-          {Object.keys(parts).length === 0 && (
-            <p>Your cart is empty. Go build something!</p>
+          {cart.length === 0 && (
+            <p>Your cart is empty. Go build something or shop components!</p>
           )}
-          {types.map((type) => {
-            const item = parts[type.name];
-            if (!item) return null; // skip components that have been removed
-            return (
-              <div
-                className={`cart-card ${
-                  removingId === type.name ? "removing" : ""
-                }`}
-                key={type.name}
-              >
-                <img
-                  src={item?.image || "/default-avatar.png"}
-                  alt={item?.name}
-                />
-                <div>
-                  <b>{type.name}</b>
-                  <p>{item?.name || "Not Selected"}</p>
-                </div>
-                <div className="cart-actions">
-                  <div className="qty-box">
-                    <button onClick={() => changeQty(type.name, "dec")}>
-                      −
-                    </button>
-                    <span>{item?.qty || 1}</span>
-                    <button onClick={() => changeQty(type.name, "inc")}>
-                      +
+
+          {cart.map((cartItem) => {
+            // Case 1: Individual Product
+            if (!cartItem.components) {
+              const imageUrl = cartItem.image
+                ? (cartItem.image.startsWith("http") ? cartItem.image : `${API.defaults.baseURL.replace(/\/api$/, "")}${cartItem.image}`)
+                : "/default-avatar.png";
+
+              return (
+                <div
+                  className={`cart-card ${removingId === cartItem.id ? "removing" : ""}`}
+                  key={cartItem.id}
+                >
+                  <img src={imageUrl} alt={cartItem.name} />
+                  <div>
+                    <b>{cartItem.type}</b>
+                    <p>{cartItem.name}</p>
+                  </div>
+                  <div className="cart-actions">
+                    <div className="qty-box">
+                      <button onClick={() => changeQty(cartItem.id, "dec")}>−</button>
+                      <span>{cartItem.qty}</span>
+                      <button onClick={() => changeQty(cartItem.id, "inc")}>+</button>
+                    </div>
+                    <div className="cart-price">
+                      ₹{(cartItem.price || 0) * (cartItem.qty || 1)}
+                    </div>
+                    <button className="remove-btn" onClick={() => handleRemoveSingle(cartItem.id)}>
+                      <FaTrash /> Remove
                     </button>
                   </div>
-
-                  <div className="cart-price">
-                    ₹{(item?.price || 0) * (item?.qty || 1)}
-                  </div>
-
-                  <button
-                    className="remove-btn"
-                    onClick={() => handleRemove(type.name)}
-                  >
-                    <FaTrash /> Remove
-                  </button>
                 </div>
-              </div>
-            );
+              );
+            }
+
+            // Case 2: Custom Build (multiple components)
+            return Object.keys(cartItem.components).map((typeName) => {
+              const item = cartItem.components[typeName];
+              const uniqueKey = `${cartItem.id}-${typeName}`;
+              const imageUrl = item.image
+                ? (item.image.startsWith("http") ? item.image : `${API.defaults.baseURL.replace(/\/api$/, "")}${item.image}`)
+                : "/default-avatar.png";
+
+              return (
+                <div
+                  className={`cart-card ${removingId === typeName ? "removing" : ""}`}
+                  key={uniqueKey}
+                >
+                  <img src={imageUrl} alt={item.name} />
+                  <div>
+                    <b>{typeName} <small>(Build Item)</small></b>
+                    <p>{item.name}</p>
+                  </div>
+                  <div className="cart-actions">
+                    <div className="qty-box">
+                      <button onClick={() => changeBuildQty(cartItem.id, typeName, "dec")}>−</button>
+                      <span>{item.qty || 1}</span>
+                      <button onClick={() => changeBuildQty(cartItem.id, typeName, "inc")}>+</button>
+                    </div>
+                    <div className="cart-price">
+                      ₹{(item.price || 0) * (item.qty || 1)}
+                    </div>
+                    <button className="remove-btn" onClick={() => handleRemoveBuildItem(cartItem.id, typeName)}>
+                      <FaTrash /> Remove
+                    </button>
+                  </div>
+                </div>
+              );
+            });
           })}
         </div>
 
         {/* RIGHT SIDE */}
         <div className="cart-right">
           <h3>Total Price</h3>
-          <h1>₹{totalPrice}</h1>
+          <h1>₹{cartTotal}</h1>
           <div className="delivery-box">
             <span className="delivery-icon">🚚</span>
             <div>

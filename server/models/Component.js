@@ -24,7 +24,7 @@ const componentSchema = new mongoose.Schema(
 
     watt: {
       type: Number,
-      default: "",
+      default: 0,
     },
 
     price: {
@@ -32,9 +32,36 @@ const componentSchema = new mongoose.Schema(
       required: true,
     },
 
+    originalPrice: {
+      type: Number,
+    },
+
+    brand: {
+      type: String,
+      default: "",
+    },
+
+    description: {
+      type: String,
+      default: "",
+    },
+
+    cores: {
+      type: Number,
+    },
+
+    threads: {
+      type: Number,
+    },
+
     image: {
-    type: String,
-    default: "",
+      type: String,
+      default: "",
+    },
+
+    isBestSeller: {
+      type: Boolean,
+      default: false,
     },
 
     specs: Object,

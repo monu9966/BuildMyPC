@@ -1,7 +1,6 @@
 import { API } from "./api";
 
 /* AUTH */
-// API helpers automatically unwrap the response data so callers don't need to access .data
 export const loginUser = (data) =>
   API.post("/auth/login", data).then((res) => res.data);
 export const registerUser = (data) =>
@@ -38,3 +37,18 @@ export const placeCODOrder = (data) => API.post("/orders/cod", data);
 export const getCart = () => API.get("/cart");
 export const saveCart = (data) => API.post("/cart", data);
 export const removeFromCart = (id) => API.delete(`/cart/${id}`);
+
+// Add this to api.js
+export const fetchSearchResults = async (query) => {
+    try {
+        // This hits your backend search route
+        const response = await API.get(`/components/search?q=${query}`);
+        return await response.data;
+    } catch (error) {
+        console.error("Search fetch error:", error);
+        return [];
+    }
+};
+
+export const fetchProductById = (id) => 
+  API.get(`/components/${id}`).then(res => res.data);

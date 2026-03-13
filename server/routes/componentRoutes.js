@@ -18,22 +18,17 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const { type } = req.query;
+    const { type, search, q, category } = req.query;
     const page = Number(req.query.page) || 1;
-    // allow limit=0 to mean no limit (return everything)
-    const rawLimit = req.query.limit !== undefined ? Number(req.query.limit) : 5;
-    const limit = rawLimit;
-    const search = req.query.search || "";
-    const category = req.query.category || "";
+    const limit = req.query.limit !== undefined ? Number(req.query.limit) : 10;
+    const searchQuery = search || q || "";
 
-    const query = {
-      name: { $regex: search, $options: "i" },
-    };
+    const query = {};
 
-    if (search) {
+    if (searchQuery) {
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
+        { name: { $regex: searchQuery, $options: "i" } },
+        { category: { $regex: searchQuery, $options: "i" } },
       ];
     }
 
@@ -48,19 +43,50 @@ router.get("/", async (req, res) => {
     const total = await Component.countDocuments(query);
 
     let dataQuery = Component.find(query).sort({ createdAt: -1 });
-    if (limit && limit > 0) {
+    if (limit > 0) {
       dataQuery = dataQuery.skip((page - 1) * limit).limit(limit);
     }
 
     const data = await dataQuery;
 
-    const response = { data };
-    if (limit && limit > 0) {
-      response.totalPages = Math.ceil(total / limit);
-      response.currentPage = page;
-    }
+    const response = { 
+      data,
+      total,
+      totalPages: limit > 0 ? Math.ceil(total / limit) : 1,
+      currentPage: page
+    };
 
     res.json(response);
+  } catch (err) {
+    console.error("Error fetching components:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Search alias if needed by frontend
+router.get("/search", async (req, res) => {
+  try {
+    const query = req.query.q || req.query.search || "";
+    const results = await Component.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } }
+      ]
+    }).limit(20);
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ message: "Search error" });
+  }
+});
+
+// Get by ID - must be after /search to not conflict
+router.get("/:id", async (req, res) => {
+  try {
+    const component = await Component.findById(req.params.id);
+    if (!component) {
+      return res.status(404).json({ message: "Component not found" });
+    }
+    res.json(component);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -68,29 +94,26 @@ router.get("/", async (req, res) => {
 
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    const { type, name, price, socket, ramType, watt } = req.body;
+    const { type, name, price } = req.body;
 
     if (!type || !name || !price) {
-      return res.status(400).json({ message: "All fields required" });
+      return res.status(400).json({ message: "Type, Name, and Price are required" });
     }
 
-    const image = req.file
-      ? `http://localhost:5000/uploads/${req.file.filename}`
-      : "";
+    const itemData = { ...req.body };
 
-    const item = await Component.create({
-      type,
-      name,
-      price,
-      socket,
-      ramType,
-      watt,
-      image,
-    });
+    if (req.file) {
+      itemData.image = `/uploads/${req.file.filename}`;
+    }
 
-    res.json(item);
+    if (itemData.isBestSeller !== undefined) {
+      itemData.isBestSeller = itemData.isBestSeller === "true" || itemData.isBestSeller === true;
+    }
+
+    const item = await Component.create(itemData);
+    res.status(201).json(item);
   } catch (err) {
-    console.log(err);
+    console.error("Create component error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -103,23 +126,40 @@ router.put("/:id", upload.single("image"), async (req, res) => {
     };
 
     if (req.file) {
-      updateData.image = `http://localhost:5000/uploads/${req.file.filename}`;
+      updateData.image = `/uploads/${req.file.filename}`;
+    }
+
+    if (updateData.isBestSeller !== undefined) {
+      updateData.isBestSeller = updateData.isBestSeller === "true" || updateData.isBestSeller === true;
     }
 
     const item = await Component.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
     });
 
+    if (!item) {
+      return res.status(404).json({ message: "Component not found" });
+    }
+
     res.json(item);
   } catch (err) {
+    console.error("Update error:", err);
     res.status(500).json({ message: "Update error" });
   }
 });
 
 // Delete
 router.delete("/:id", async (req, res) => {
-  await Component.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
+  try {
+    const item = await Component.findByIdAndDelete(req.params.id);
+    if (!item) {
+      return res.status(404).json({ message: "Component not found" });
+    }
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ message: "Delete error" });
+  }
 });
 
 export default router;
